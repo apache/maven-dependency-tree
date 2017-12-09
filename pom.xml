@@ -34,14 +34,19 @@
   <description>A tree-based API for resolution of Maven project dependencies</description>
 
   <scm>
-    <connection>scm:svn:http://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-tree/</connection>
-    <developerConnection>scm:svn:https://svn.apache.org/repos/asf/maven/shared/trunk/maven-dependency-tree/</developerConnection>
-    <url>http://svn.apache.org/viewvc/maven/shared/trunk/maven-dependency-tree/</url>
+    <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-tree.git</connection>
+    <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-tree.git</developerConnection>
+    <url>https://github.com/apache/maven-dependency-tree/tree/${project.scm.tag}</url>
+    <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <system>jira</system>
     <url>https://issues.apache.org/jira/browse/MSHARED/component/12326427</url>
   </issueManagement>
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>https://builds.apache.org/job/maven-box/job/maven-dependency-tree/</url>
+  </ciManagement>
   <distributionManagement>
     <site>
       <id>apache.website</id>
