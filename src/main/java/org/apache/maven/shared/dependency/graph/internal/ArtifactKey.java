@@ -39,7 +39,7 @@ final class ArtifactKey
         this.version = version;
     }
 
-    public ArtifactKey( MavenProject project )
+    ArtifactKey( MavenProject project )
     {
         this( project.getGroupId(), project.getArtifactId(), project.getVersion() );
     }

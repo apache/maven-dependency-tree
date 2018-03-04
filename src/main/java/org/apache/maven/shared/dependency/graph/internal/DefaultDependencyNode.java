@@ -210,7 +210,7 @@ public class DefaultDependencyNode implements DependencyNode
 
         private boolean appended;
 
-        public ItemAppender( StringBuffer buffer, String startToken, String separatorToken, String endToken )
+        ItemAppender( StringBuffer buffer, String startToken, String separatorToken, String endToken )
         {
             this.buffer = buffer;
             this.startToken = startToken;
