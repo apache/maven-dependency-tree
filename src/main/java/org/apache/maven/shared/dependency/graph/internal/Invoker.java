@@ -102,4 +102,26 @@ final class Invoker
             throw new DependencyGraphBuilderException( e.getMessage(), e );
         }
     }
+
+    public static Object invoke( Class<?> objectClazz, String staticMethod, Class<?> argClazz1, Class<?> argClazz2,
+                                 Object arg1, Object arg2 )
+        throws DependencyGraphBuilderException
+    {
+        try
+        {
+            return objectClazz.getMethod( staticMethod, argClazz1, argClazz2 ).invoke( null, arg1, arg2 );
+        }
+        catch ( IllegalAccessException e )
+        {
+            throw new DependencyGraphBuilderException( e.getMessage(), e );
+        }
+        catch ( InvocationTargetException e )
+        {
+            throw new DependencyGraphBuilderException( e.getMessage(), e );
+        }
+        catch ( NoSuchMethodException e )
+        {
+            throw new DependencyGraphBuilderException( e.getMessage(), e );
+        }
+    }
 }

@@ -55,12 +55,17 @@
   </distributionManagement>
 
   <properties>
-    <mavenVersion>3.0</mavenVersion>
+    <mavenVersion>3.0.4</mavenVersion>
+    <eclipseAetherVersion>0.9.0.M2</eclipseAetherVersion>
+    <sonatypeAetherAPIVersion>1.13.1</sonatypeAetherAPIVersion>
   </properties>
 
   <contributors>
     <contributor>
       <name>Tuomas Kiviaho</name>
+    </contributor>
+    <contributor>
+      <name>Gabriel Belingueres</name>
     </contributor>
   </contributors>
 
@@ -68,7 +73,19 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>3.0.4</version>
+      <version>${mavenVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-model</artifactId>
+      <version>${mavenVersion}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-artifact</artifactId>
+      <version>${mavenVersion}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -79,19 +96,31 @@
     <dependency>
       <groupId>org.sonatype.aether</groupId>
       <artifactId>aether-api</artifactId>
-      <version>1.13.1</version>
+      <version>${sonatypeAetherAPIVersion}</version>
       <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.sonatype.aether</groupId>
+      <artifactId>aether-util</artifactId>
+      <version>${sonatypeAetherAPIVersion}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.sonatype.aether</groupId>
+          <artifactId>aether-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.eclipse.aether</groupId>
       <artifactId>aether-api</artifactId>
-      <version>0.9.0.M2</version>
+      <version>${eclipseAetherVersion}</version>
+      <scope>provided</scope>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.eclipse.aether</groupId>
       <artifactId>aether-util</artifactId>
-      <version>0.9.0.M2</version>
+      <version>${eclipseAetherVersion}</version>
       <exclusions>
         <exclusion>
           <groupId>org.eclipse.aether</groupId>
@@ -99,7 +128,6 @@
         </exclusion>
       </exclusions>
     </dependency>
-
     <dependency>
       <groupId>jmock</groupId>
       <artifactId>jmock</artifactId>
@@ -196,7 +224,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>      
+      </plugin>
     </plugins>
   </build>
 
