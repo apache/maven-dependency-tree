@@ -42,6 +42,7 @@ import org.sonatype.aether.artifact.ArtifactTypeRegistry;
 import org.sonatype.aether.collection.CollectRequest;
 import org.sonatype.aether.collection.CollectResult;
 import org.sonatype.aether.collection.DependencyCollectionException;
+import org.sonatype.aether.collection.DependencyGraphTransformer;
 import org.sonatype.aether.collection.DependencySelector;
 import org.sonatype.aether.graph.DependencyVisitor;
 import org.sonatype.aether.util.DefaultRepositorySystemSession;
@@ -51,6 +52,10 @@ import org.sonatype.aether.util.graph.selector.AndDependencySelector;
 import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
 import org.sonatype.aether.util.graph.selector.OptionalDependencySelector;
 import org.sonatype.aether.util.graph.selector.ScopeDependencySelector;
+import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
+import org.sonatype.aether.util.graph.transformer.ConflictMarker;
+import org.sonatype.aether.util.graph.transformer.JavaDependencyContextRefiner;
+import org.sonatype.aether.util.graph.transformer.JavaEffectiveScopeCalculator;
 import org.sonatype.aether.version.VersionConstraint;
 
 /**
@@ -87,10 +92,13 @@ public class Maven3DependencyCollectorBuilder
 
             DefaultRepositorySystemSession session = new DefaultRepositorySystemSession( repositorySystemSession );
 
-            session.setDependencyGraphTransformer( null );
+            DependencyGraphTransformer transformer =
+                new ChainedDependencyGraphTransformer( new ConflictMarker(), new JavaEffectiveScopeCalculator(),
+                                                       new JavaDependencyContextRefiner() );
+            session.setDependencyGraphTransformer( transformer );
 
             DependencySelector depFilter =
-                new AndDependencySelector( new ScopeDependencySelector( "provided" ), new OptionalDependencySelector(),
+                new AndDependencySelector( new ScopeDependencySelector(), new OptionalDependencySelector(),
                                            new ExclusionDependencySelector() );
             session.setDependencySelector( depFilter );
 

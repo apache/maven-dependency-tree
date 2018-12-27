@@ -55,7 +55,6 @@ import org.eclipse.aether.util.graph.transformer.JavaScopeDeriver;
 import org.eclipse.aether.util.graph.transformer.JavaScopeSelector;
 import org.eclipse.aether.util.graph.transformer.NearestVersionSelector;
 import org.eclipse.aether.util.graph.transformer.SimpleOptionalitySelector;
-import org.eclipse.aether.util.graph.visitor.CloningDependencyVisitor;
 import org.eclipse.aether.util.graph.visitor.TreeDependencyVisitor;
 import org.eclipse.aether.version.VersionConstraint;
 
@@ -75,30 +74,35 @@ public class Maven31DependencyCollectorBuilder
 
     @Override
     public DependencyNode collectDependencyGraph( ArtifactRepository localRepository,
-                                                ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
+                                                  ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyGraphBuilderException
     {
         DefaultRepositorySystemSession session = null;
         try
         {
             MavenProject project = buildingRequest.getProject();
+
             Artifact projectArtifact = project.getArtifact();
             List<ArtifactRepository> remoteArtifactRepositories = project.getRemoteArtifactRepositories();
 
             DefaultRepositorySystemSession repositorySession =
                 (DefaultRepositorySystemSession) Invoker.invoke( buildingRequest, "getRepositorySession" );
-            
+
             session = new DefaultRepositorySystemSession( repositorySession );
 
             DependencyGraphTransformer transformer =
                 new ConflictResolver( new NearestVersionSelector(), new JavaScopeSelector(),
                                       new SimpleOptionalitySelector(), new JavaScopeDeriver() );
-
             session.setDependencyGraphTransformer( transformer );
+
+            DependencySelector depFilter =
+                new AndDependencySelector( new ScopeDependencySelector(), new OptionalDependencySelector(),
+                                           new ExclusionDependencySelector() );
+            session.setDependencySelector( depFilter );
 
             session.setConfigProperty( ConflictResolver.CONFIG_PROP_VERBOSE, true );
             session.setConfigProperty( DependencyManagerUtils.CONFIG_PROP_VERBOSE, true );
-            
+
             org.eclipse.aether.artifact.Artifact aetherArtifact =
                 (org.eclipse.aether.artifact.Artifact) Invoker.invoke( RepositoryUtils.class, "toArtifact",
                                                                        Artifact.class, projectArtifact );
@@ -113,11 +117,6 @@ public class Maven31DependencyCollectorBuilder
             collectRequest.setRoot( new org.eclipse.aether.graph.Dependency( aetherArtifact, "" ) );
             collectRequest.setRepositories( aetherRepos );
 
-            DependencySelector depFilter =
-                new AndDependencySelector( new ScopeDependencySelector( "provided" ), new OptionalDependencySelector(),
-                                           new ExclusionDependencySelector() );
-            session.setDependencySelector( depFilter );
-            
             org.eclipse.aether.artifact.ArtifactTypeRegistry stereotypes = session.getArtifactTypeRegistry();
             collectDependencyList( collectRequest, project, stereotypes );
             collectManagedDependencyList( collectRequest, project, stereotypes );
@@ -126,11 +125,11 @@ public class Maven31DependencyCollectorBuilder
 
             org.eclipse.aether.graph.DependencyNode rootNode = collectResult.getRoot();
 
-            CloningDependencyVisitor cloner = new CloningDependencyVisitor();
-            TreeDependencyVisitor treeVisitor = new TreeDependencyVisitor( cloner );
-            rootNode.accept( treeVisitor );
-
-            rootNode = cloner.getRootNode();
+//            CloningDependencyVisitor cloner = new CloningDependencyVisitor();
+//            TreeDependencyVisitor treeVisitor = new TreeDependencyVisitor( cloner );
+//            rootNode.accept( treeVisitor );
+//
+//            rootNode = cloner.getRootNode();
 
             if ( getLogger().isDebugEnabled() )
             {
@@ -192,7 +191,7 @@ public class Maven31DependencyCollectorBuilder
     }
 
     private void collectDependencyList( CollectRequest collectRequest, MavenProject project,
-                                         org.eclipse.aether.artifact.ArtifactTypeRegistry stereotypes )
+                                        org.eclipse.aether.artifact.ArtifactTypeRegistry stereotypes )
         throws DependencyGraphBuilderException
     {
         for ( Dependency dependency : project.getDependencies() )
@@ -242,7 +241,7 @@ public class Maven31DependencyCollectorBuilder
     {
         String premanagedVersion = DependencyManagerUtils.getPremanagedVersion( node );
         String premanagedScope = DependencyManagerUtils.getPremanagedScope( node );
-        
+
         Boolean optional = null;
         if ( node.getDependency() != null )
         {
