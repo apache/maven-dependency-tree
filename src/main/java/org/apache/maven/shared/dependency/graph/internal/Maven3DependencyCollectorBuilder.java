@@ -33,6 +33,12 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.shared.dependency.graph.DependencyCollectorBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
+import org.apache.maven.shared.dependency.graph.internal.maven30.ConflictResolver;
+import org.apache.maven.shared.dependency.graph.internal.maven30.JavaScopeDeriver;
+import org.apache.maven.shared.dependency.graph.internal.maven30.JavaScopeSelector;
+import org.apache.maven.shared.dependency.graph.internal.maven30.Maven3DirectScopeDependencySelector;
+import org.apache.maven.shared.dependency.graph.internal.maven30.NearestVersionSelector;
+import org.apache.maven.shared.dependency.graph.internal.maven30.SimpleOptionalitySelector;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
@@ -46,16 +52,11 @@ import org.sonatype.aether.collection.DependencyGraphTransformer;
 import org.sonatype.aether.collection.DependencySelector;
 import org.sonatype.aether.graph.DependencyVisitor;
 import org.sonatype.aether.util.DefaultRepositorySystemSession;
-import org.sonatype.aether.util.graph.CloningDependencyVisitor;
+import org.sonatype.aether.util.artifact.JavaScopes;
 import org.sonatype.aether.util.graph.TreeDependencyVisitor;
 import org.sonatype.aether.util.graph.selector.AndDependencySelector;
 import org.sonatype.aether.util.graph.selector.ExclusionDependencySelector;
 import org.sonatype.aether.util.graph.selector.OptionalDependencySelector;
-import org.sonatype.aether.util.graph.selector.ScopeDependencySelector;
-import org.sonatype.aether.util.graph.transformer.ChainedDependencyGraphTransformer;
-import org.sonatype.aether.util.graph.transformer.ConflictMarker;
-import org.sonatype.aether.util.graph.transformer.JavaDependencyContextRefiner;
-import org.sonatype.aether.util.graph.transformer.JavaEffectiveScopeCalculator;
 import org.sonatype.aether.version.VersionConstraint;
 
 /**
@@ -77,7 +78,6 @@ public class Maven3DependencyCollectorBuilder
                                                 ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyGraphBuilderException
     {
-        ClassLoader prevClassLoader = Thread.currentThread().getContextClassLoader();
         try
         {
             MavenProject project = buildingRequest.getProject();
@@ -93,14 +93,18 @@ public class Maven3DependencyCollectorBuilder
             DefaultRepositorySystemSession session = new DefaultRepositorySystemSession( repositorySystemSession );
 
             DependencyGraphTransformer transformer =
-                new ChainedDependencyGraphTransformer( new ConflictMarker(), new JavaEffectiveScopeCalculator(),
-                                                       new JavaDependencyContextRefiner() );
+                new ConflictResolver( new NearestVersionSelector(), new JavaScopeSelector(),
+                                      new SimpleOptionalitySelector(), new JavaScopeDeriver() );
             session.setDependencyGraphTransformer( transformer );
 
             DependencySelector depFilter =
-                new AndDependencySelector( new ScopeDependencySelector(), new OptionalDependencySelector(),
+                new AndDependencySelector( new Maven3DirectScopeDependencySelector( JavaScopes.TEST ),
+                                           new OptionalDependencySelector(), 
                                            new ExclusionDependencySelector() );
             session.setDependencySelector( depFilter );
+
+            session.setConfigProperty( ConflictResolver.CONFIG_PROP_VERBOSE, true );
+            session.setConfigProperty( "aether.dependencyManager.verbose", true );
 
             org.sonatype.aether.artifact.Artifact aetherArtifact =
                 (org.sonatype.aether.artifact.Artifact) Invoker.invoke( RepositoryUtils.class, "toArtifact",
@@ -124,12 +128,6 @@ public class Maven3DependencyCollectorBuilder
 
             org.sonatype.aether.graph.DependencyNode rootNode = collectResult.getRoot();
 
-            CloningDependencyVisitor cloner = new CloningDependencyVisitor();
-            TreeDependencyVisitor treeVisitor = new TreeDependencyVisitor( cloner );
-            rootNode.accept( treeVisitor );
-
-            rootNode = cloner.getRootNode();
-
             if ( getLogger().isDebugEnabled() )
             {
                 logTree( rootNode );
@@ -140,10 +138,6 @@ public class Maven3DependencyCollectorBuilder
         catch ( DependencyCollectionException e )
         {
             throw new DependencyGraphBuilderException( "Could not collect dependencies: " + e.getResult(), e );
-        }
-        finally
-        {
-            Thread.currentThread().setContextClassLoader( prevClassLoader );
         }
     }
 
