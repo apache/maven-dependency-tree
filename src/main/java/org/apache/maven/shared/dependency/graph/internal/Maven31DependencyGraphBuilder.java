@@ -42,8 +42,10 @@ import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
+import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.util.graph.manager.DependencyManagerUtils;
 import org.eclipse.aether.version.VersionConstraint;
 
 /**
@@ -96,12 +98,12 @@ public class Maven31DependencyGraphBuilder
         RepositorySystemSession session =
             (RepositorySystemSession) Invoker.invoke( buildingRequest, "getRepositorySession" );
 
-        /*
-         * if ( Boolean.TRUE != ( (Boolean) session.getConfigProperties().get(
-         * DependencyManagerUtils.NODE_DATA_PREMANAGED_VERSION ) ) ) { DefaultRepositorySystemSession newSession = new
-         * DefaultRepositorySystemSession( session ); newSession.setConfigProperty(
-         * DependencyManagerUtils.NODE_DATA_PREMANAGED_VERSION, true ); session = newSession; }
-         */
+        if ( Boolean.TRUE != session.getConfigProperties().get( DependencyManagerUtils.NODE_DATA_PREMANAGED_VERSION ) )
+        {
+            DefaultRepositorySystemSession newSession = new DefaultRepositorySystemSession( session );
+            newSession.setConfigProperty( DependencyManagerUtils.NODE_DATA_PREMANAGED_VERSION, true );
+            session = newSession;
+        }
 
         final DependencyResolutionRequest request = new DefaultDependencyResolutionRequest();
         request.setMavenProject( project );
@@ -205,8 +207,8 @@ public class Maven31DependencyGraphBuilder
     private DependencyNode buildDependencyNode( DependencyNode parent, org.eclipse.aether.graph.DependencyNode node,
                                                 Artifact artifact, ArtifactFilter filter )
     {
-        String premanagedVersion = null; // DependencyManagerUtils.getPremanagedVersion( node );
-        String premanagedScope = null; // DependencyManagerUtils.getPremanagedScope( node );
+        String premanagedVersion = DependencyManagerUtils.getPremanagedVersion( node );
+        String premanagedScope = DependencyManagerUtils.getPremanagedScope( node );
 
         Boolean optional = null;
         if ( node.getDependency() != null )

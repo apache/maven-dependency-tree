@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.maven.shared</groupId>
     <artifactId>maven-shared-components</artifactId>
-    <version>31</version>
+    <version>33</version>
     <relativePath>../../pom/maven/maven-shared-components/pom.xml</relativePath>
   </parent>
 
@@ -68,7 +68,7 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>3.0.4</version>
+      <version>3.0.5</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -186,7 +186,7 @@
               These files contains the expected output of this component and can not contain a license header.
             -->
             <exclude>src/it/*/expected*.txt</exclude>
-          </excludes>            
+          </excludes>
         </configuration>
         <executions>
           <execution>
