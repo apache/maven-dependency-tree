@@ -44,6 +44,7 @@ import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.graph.Exclusion;
 import org.eclipse.aether.version.VersionConstraint;
 
 /**
@@ -208,16 +209,24 @@ public class Maven31DependencyGraphBuilder
         String premanagedVersion = null; // DependencyManagerUtils.getPremanagedVersion( node );
         String premanagedScope = null; // DependencyManagerUtils.getPremanagedScope( node );
 
+        List<org.apache.maven.model.Exclusion> exclusions = null;
         Boolean optional = null;
         if ( node.getDependency() != null )
         {
-            optional = node.getDependency().isOptional();
+            exclusions = new ArrayList<>( node.getDependency().getExclusions().size() );
+            for ( Exclusion exclusion : node.getDependency().getExclusions() )
+            {
+                org.apache.maven.model.Exclusion modelExclusion = new org.apache.maven.model.Exclusion();
+                modelExclusion.setGroupId( exclusion.getGroupId() );
+                modelExclusion.setArtifactId( exclusion.getArtifactId() );
+                exclusions.add( modelExclusion );
+            }
         }
 
         DefaultDependencyNode current =
             new DefaultDependencyNode( parent, artifact, premanagedVersion, premanagedScope,
                                        getVersionSelectedFromRange( node.getVersionConstraint() ),
-                                       optional );
+                                       optional, exclusions );
 
         List<DependencyNode> nodes = new ArrayList<DependencyNode>( node.getChildren().size() );
         for ( org.eclipse.aether.graph.DependencyNode child : node.getChildren() )

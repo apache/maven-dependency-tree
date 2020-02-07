@@ -22,6 +22,7 @@ package org.apache.maven.shared.dependency.graph.internal;
 import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Exclusion;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 
@@ -31,7 +32,7 @@ import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 public class DefaultDependencyNode implements DependencyNode
 {
     private final Artifact artifact;
-
+    
     private final DependencyNode parent;
 
     private final String premanagedVersion;
@@ -43,6 +44,8 @@ public class DefaultDependencyNode implements DependencyNode
     private List<DependencyNode> children;
 
     private Boolean optional;
+
+    private List<Exclusion> exclusions;
 
     /**
      * Constructs the DefaultDependencyNode.
@@ -64,7 +67,8 @@ public class DefaultDependencyNode implements DependencyNode
     }
 
     public DefaultDependencyNode( DependencyNode parent, Artifact artifact, String premanagedVersion,
-                                  String premanagedScope, String versionConstraint, Boolean optional )
+                                  String premanagedScope, String versionConstraint, Boolean optional,
+                                  List<Exclusion> exclusions )
     {
         this.parent = parent;
         this.artifact = artifact;
@@ -72,6 +76,7 @@ public class DefaultDependencyNode implements DependencyNode
         this.premanagedScope = premanagedScope;
         this.versionConstraint = versionConstraint;
         this.optional = optional;
+        this.exclusions = exclusions;
     }
 
     /**
@@ -158,13 +163,19 @@ public class DefaultDependencyNode implements DependencyNode
         return optional;
     }
 
+    @Override
+    public List<Exclusion> getExclusions()
+    {
+        return exclusions;
+    }
+
     /**
      * @return Stringified representation of this DependencyNode.
      */
     @Override
     public String toNodeString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         buffer.append( artifact );
 
@@ -200,7 +211,7 @@ public class DefaultDependencyNode implements DependencyNode
      */
     private static class ItemAppender
     {
-        private StringBuffer buffer;
+        private StringBuilder buffer;
 
         private String startToken;
 
@@ -210,7 +221,7 @@ public class DefaultDependencyNode implements DependencyNode
 
         private boolean appended;
 
-        ItemAppender( StringBuffer buffer, String startToken, String separatorToken, String endToken )
+        ItemAppender( StringBuilder buffer, String startToken, String separatorToken, String endToken )
         {
             this.buffer = buffer;
             this.startToken = startToken;

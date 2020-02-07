@@ -22,6 +22,7 @@ package org.apache.maven.shared.dependency.graph;
 import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Exclusion;
 import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 
 /**
@@ -92,4 +93,10 @@ public interface DependencyNode
      * @return true for an optional dependency.
      */
     Boolean getOptional();
+    
+    /**
+     * 
+     * @return the exclusions of the dependency
+     */
+    List<Exclusion> getExclusions();
 }
