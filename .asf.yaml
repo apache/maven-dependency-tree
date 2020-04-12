@@ -16,7 +16,7 @@
 #
 # see https://s.apache.org/asfyaml
 github:
-  description: "Apache Maven Dependency Tree"
+  description: "Apache Maven Filtering"
   homepage: https://maven.apache.org/shared/maven-dependency-tree/
   labels:
     - java

@@ -14,7 +14,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-Contributing to [Apache Maven Dependency Tree](https://maven.apache.org/shared/maven-dependency-tree/)
+Contributing to [Apache Maven Filtering](https://maven.apache.org/shared/maven-dependency-tree/)
 ======================
 
 [![ASF Jira](https://img.shields.io/endpoint?url=https%3A%2F%2Fmaven.apache.org%2Fbadges%2Fasf_jira-MSHARED.json)][jira]
