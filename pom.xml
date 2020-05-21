@@ -129,14 +129,6 @@
         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>**/DefaultDependencyTreeBuilderTest*</exclude><!-- FIXME: conflict on DefaultArtifactFactory between maven-core 3.x and maven-artifact 2.x -->
-          </excludes>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-invoker-plugin</artifactId>
         <configuration>
