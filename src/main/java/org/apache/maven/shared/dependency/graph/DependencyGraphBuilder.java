@@ -26,7 +26,7 @@ import org.apache.maven.project.ProjectBuildingRequest;
 import java.util.Collection;
 
 /**
- * Maven project dependency graph builder API, neutral against Maven 2 or Maven 3.
+ * Maven project dependency graph builder API, based on Maven 3.1+.
  *
  * @author Hervé Boutemy
  * @since 2.0

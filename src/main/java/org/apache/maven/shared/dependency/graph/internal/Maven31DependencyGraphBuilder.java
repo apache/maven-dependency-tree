@@ -94,8 +94,7 @@ public class Maven31DependencyGraphBuilder
     {
         MavenProject project = buildingRequest.getProject();
 
-        RepositorySystemSession session =
-            (RepositorySystemSession) Invoker.invoke( buildingRequest, "getRepositorySession" );
+        RepositorySystemSession session = buildingRequest.getRepositorySession();
 
         /*
          * if ( Boolean.TRUE != ( (Boolean) session.getConfigProperties().get(
@@ -106,14 +105,11 @@ public class Maven31DependencyGraphBuilder
 
         final DependencyResolutionRequest request = new DefaultDependencyResolutionRequest();
         request.setMavenProject( project );
-        Invoker.invoke( request, "setRepositorySession", RepositorySystemSession.class, session );
+        request.setRepositorySession( session );
 
         final DependencyResolutionResult result = resolveDependencies( request, reactorProjects );
-        org.eclipse.aether.graph.DependencyNode graph =
-            (org.eclipse.aether.graph.DependencyNode) Invoker.invoke( DependencyResolutionResult.class, result,
-                                                                      "getDependencyGraph" );
 
-        return buildDependencyNode( null, graph, project.getArtifact(), filter );
+        return buildDependencyNode( null, result.getDependencyGraph(), project.getArtifact(), filter );
     }
 
     private DependencyResolutionResult resolveDependencies( DependencyResolutionRequest request,
@@ -145,7 +141,7 @@ public class Maven31DependencyGraphBuilder
 
         List<Dependency> reactorDeps = getReactorDependencies( reactorProjects, result.getUnresolvedDependencies() );
         result.getUnresolvedDependencies().removeAll( reactorDeps );
-        Invoker.invoke( result.getResolvedDependencies(), "addAll", Collection.class, reactorDeps );
+        result.getResolvedDependencies().addAll( reactorDeps );
 
         if ( !result.getUnresolvedDependencies().isEmpty() )
         {
@@ -158,13 +154,13 @@ public class Maven31DependencyGraphBuilder
 
     private List<Dependency> getReactorDependencies( Collection<MavenProject> reactorProjects, List<?> dependencies )
     {
-        Set<ArtifactKey> reactorProjectsIds = new HashSet<ArtifactKey>();
+        Set<ArtifactKey> reactorProjectsIds = new HashSet<>();
         for ( MavenProject project : reactorProjects )
         {
             reactorProjectsIds.add( new ArtifactKey( project ) );
         }
 
-        List<Dependency> reactorDeps = new ArrayList<Dependency>();
+        List<Dependency> reactorDeps = new ArrayList<>();
         for ( Object untypedDependency : dependencies )
         {
             Dependency dependency = (Dependency) untypedDependency;
@@ -180,27 +176,6 @@ public class Maven31DependencyGraphBuilder
         }
 
         return reactorDeps;
-    }
-
-    private Artifact getDependencyArtifact( Dependency dep )
-    {
-        org.eclipse.aether.artifact.Artifact artifact = dep.getArtifact();
-
-        try
-        {
-            Artifact mavenArtifact = (Artifact) Invoker.invoke( RepositoryUtils.class, "toArtifact",
-                                              org.eclipse.aether.artifact.Artifact.class, artifact );
-
-            mavenArtifact.setScope( dep.getScope() );
-            mavenArtifact.setOptional( dep.isOptional() );
-
-            return mavenArtifact;
-        }
-        catch ( DependencyGraphBuilderException e )
-        {
-            // ReflectionException should not happen
-            throw new RuntimeException( e.getMessage(), e );
-        }
     }
 
     private DependencyNode buildDependencyNode( DependencyNode parent, org.eclipse.aether.graph.DependencyNode node,
@@ -228,14 +203,17 @@ public class Maven31DependencyGraphBuilder
                                        getVersionSelectedFromRange( node.getVersionConstraint() ),
                                        optional, exclusions );
 
-        List<DependencyNode> nodes = new ArrayList<DependencyNode>( node.getChildren().size() );
+        List<DependencyNode> nodes = new ArrayList<>( node.getChildren().size() );
         for ( org.eclipse.aether.graph.DependencyNode child : node.getChildren() )
         {
-            Artifact childArtifact = getDependencyArtifact( child.getDependency() );
+            Dependency dep = child.getDependency();
+            Artifact mavenArtifact = RepositoryUtils.toArtifact( dep.getArtifact() );
+            mavenArtifact.setScope( dep.getScope() );
+            mavenArtifact.setOptional( dep.isOptional() );
 
-            if ( ( filter == null ) || filter.include( childArtifact ) )
+            if ( ( filter == null ) || filter.include( mavenArtifact ) )
             {
-                nodes.add( buildDependencyNode( current, child, childArtifact, filter ) );
+                nodes.add( buildDependencyNode( current, child, mavenArtifact, filter ) );
             }
         }
 

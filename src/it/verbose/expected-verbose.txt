@@ -64,6 +64,7 @@ org.apache.maven.its.dependency-tree:verbose:jar:1.0-SNAPSHOT
    |  \- (org.apache.xmlgraphics:batik-xml:jar:1.7:compile - omitted for duplicate)
    +- (org.apache.xmlgraphics:batik-bridge:jar:1.7:compile - omitted for cycle)
    +- org.apache.xmlgraphics:batik-script:jar:1.7:compile
+   |  \- org.apache.xmlgraphics:batik-js:jar:1.7:compile
    +- org.apache.xmlgraphics:batik-svg-dom:jar:1.7:compile
    |  +- (org.apache.xmlgraphics:batik-svg-dom:jar:1.7:compile - omitted for cycle)
    |  +- (org.apache.xmlgraphics:batik-anim:jar:1.7:compile - omitted for duplicate)

@@ -55,7 +55,7 @@
   </distributionManagement>
 
   <properties>
-    <mavenVersion>3.0</mavenVersion>
+    <mavenVersion>3.1.1</mavenVersion>
 	<javaVersion>7</javaVersion>
     <project.build.outputTimestamp>2020-02-07T09:03:59Z</project.build.outputTimestamp>
   </properties>
@@ -70,35 +70,12 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>3.0.4</version>
+      <version>${mavenVersion}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-component-annotations</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.sonatype.aether</groupId>
-      <artifactId>aether-api</artifactId>
-      <version>1.13.1</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.aether</groupId>
-      <artifactId>aether-api</artifactId>
-      <version>1.1.0</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.aether</groupId>
-      <artifactId>aether-util</artifactId>
-      <version>1.1.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.eclipse.aether</groupId>
-          <artifactId>aether-api</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
   </dependencies>
 
@@ -114,14 +91,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <exclude>**/DefaultDependencyTreeBuilderTest*</exclude><!-- FIXME: conflict on DefaultArtifactFactory between maven-core 3.x and maven-artifact 2.x -->
-          </excludes>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -140,11 +109,8 @@
           <pomIncludes>
             <pomInclude>*/pom.xml</pomInclude>
           </pomIncludes>
-          <pomExcludes> <!-- Tree ITs, must be transformed to graph ITs -->
-            <pomExclude>maven-version/pom.xml</pomExclude>
-            <pomExclude>mshared-167/pom.xml</pomExclude>
-            <pomExclude>reactor/pom.xml</pomExclude>
-            <pomExclude>verbose/pom.xml</pomExclude>
+          <pomExcludes>
+            <pomExclude>verbose/pom.xml</pomExclude><!-- no verbose option for 3.x yet -->
           </pomExcludes>
           <properties>
             <maven.compiler.source>${maven.compiler.source}</maven.compiler.source>
@@ -173,7 +139,8 @@
               These files contains the expected output of this component and can not contain a license header.
             -->
             <exclude>src/it/*/expected*.txt</exclude>
-          </excludes>            
+            <exclude>src/it/**/*.iml</exclude>
+          </excludes>
         </configuration>
         <executions>
           <execution>
