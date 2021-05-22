@@ -62,6 +62,20 @@ public class Maven31DependencyGraphBuilder
     @Requirement
     private ProjectDependenciesResolver resolver;
 
+    private final ExceptionHandler<DependencyGraphBuilderException> exceptionHandler;
+    
+    public Maven31DependencyGraphBuilder()
+    {
+        this.exceptionHandler = new ExceptionHandler<DependencyGraphBuilderException>()
+        {
+            @Override
+            public DependencyGraphBuilderException create( String message, Exception exception )
+            {
+                return new DependencyGraphBuilderException( message, exception );
+            }
+        };
+    }
+
     /**
      * Builds the dependency graph for Maven 3.1+.
      *
@@ -95,7 +109,7 @@ public class Maven31DependencyGraphBuilder
         MavenProject project = buildingRequest.getProject();
 
         RepositorySystemSession session =
-            (RepositorySystemSession) Invoker.invoke( buildingRequest, "getRepositorySession" );
+            (RepositorySystemSession) Invoker.invoke( buildingRequest, "getRepositorySession", exceptionHandler );
 
         /*
          * if ( Boolean.TRUE != ( (Boolean) session.getConfigProperties().get(
@@ -111,7 +125,7 @@ public class Maven31DependencyGraphBuilder
         final DependencyResolutionResult result = resolveDependencies( request, reactorProjects );
         org.eclipse.aether.graph.DependencyNode graph =
             (org.eclipse.aether.graph.DependencyNode) Invoker.invoke( DependencyResolutionResult.class, result,
-                                                                      "getDependencyGraph" );
+                                                                      "getDependencyGraph", exceptionHandler );
 
         return buildDependencyNode( null, graph, project.getArtifact(), filter );
     }
@@ -189,7 +203,7 @@ public class Maven31DependencyGraphBuilder
         try
         {
             Artifact mavenArtifact = (Artifact) Invoker.invoke( RepositoryUtils.class, "toArtifact",
-                                              org.eclipse.aether.artifact.Artifact.class, artifact );
+                                              org.eclipse.aether.artifact.Artifact.class, artifact, exceptionHandler );
 
             mavenArtifact.setScope( dep.getScope() );
             mavenArtifact.setOptional( dep.isOptional() );

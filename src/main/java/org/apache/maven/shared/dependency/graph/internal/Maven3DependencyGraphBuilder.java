@@ -130,7 +130,7 @@ public class Maven3DependencyGraphBuilder
         List<Dependency> reactorDeps = getReactorDependencies( reactorProjects, result.getUnresolvedDependencies() );
 
         result.getUnresolvedDependencies().removeAll( reactorDeps );
-        Invoker.invoke( result.getResolvedDependencies(), "addAll", Collection.class, reactorDeps );
+        result.getResolvedDependencies().addAll( reactorDeps );
 
         if ( !result.getUnresolvedDependencies().isEmpty() )
         {

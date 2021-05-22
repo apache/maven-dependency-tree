@@ -19,8 +19,6 @@ package org.apache.maven.shared.dependency.graph.internal;
  * under the License.
  */
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;
 
 /**
@@ -33,34 +31,27 @@ final class Invoker
         // do not instantiate
     }
 
-    public static Object invoke( Object object, String method )
-        throws DependencyGraphBuilderException
+    static <T extends Exception> Object invoke( Object object, String method, ExceptionHandler<T> exceptionHandler )
+        throws T
     {
-        return invoke( object.getClass(), object, method );
+        return invoke( object.getClass(), object, method, exceptionHandler );
     }
 
-    public static Object invoke( Class<?> objectClazz, Object object, String method )
-        throws DependencyGraphBuilderException
+    static <T extends Exception> Object invoke( Class<?> objectClazz, Object object, String method,
+                                                ExceptionHandler<T> exceptionHandler )
+        throws T
     {
         try
         {
             return objectClazz.getMethod( method ).invoke( object );
         }
-        catch ( IllegalAccessException e )
+        catch ( ReflectiveOperationException e )
         {
-            throw new DependencyGraphBuilderException( e.getMessage(), e );
-        }
-        catch ( InvocationTargetException e )
-        {
-            throw new DependencyGraphBuilderException( e.getMessage(), e );
-        }
-        catch ( NoSuchMethodException e )
-        {
-            throw new DependencyGraphBuilderException( e.getMessage(), e );
+            throw exceptionHandler.create( e.getMessage(), e );
         }
     }
 
-    public static Object invoke( Object object, String method, Class<?> clazz, Object arg )
+    static Object invoke( Object object, String method, Class<?> clazz, Object arg )
         throws DependencyGraphBuilderException
     {
         try
@@ -68,38 +59,39 @@ final class Invoker
             final Class<?> objectClazz = object.getClass();
             return objectClazz.getMethod( method, clazz ).invoke( object, arg );
         }
-        catch ( IllegalAccessException e )
-        {
-            throw new DependencyGraphBuilderException( e.getMessage(), e );
-        }
-        catch ( InvocationTargetException e )
-        {
-            throw new DependencyGraphBuilderException( e.getMessage(), e );
-        }
-        catch ( NoSuchMethodException e )
+        catch ( ReflectiveOperationException e )
         {
             throw new DependencyGraphBuilderException( e.getMessage(), e );
         }
     }
     
-    public static Object invoke( Class<?> objectClazz, String staticMethod, Class<?> argClazz, Object arg )
-                    throws DependencyGraphBuilderException
+    static <T extends Exception> Object invoke( Class<?> objectClazz, String staticMethod,
+                                                               Class<?> argClazz, Object arg,
+                                                               ExceptionHandler<T> exceptionHandler )
+        throws T
     {
         try
         {
             return objectClazz.getMethod( staticMethod, argClazz ).invoke( null, arg );
         }
-        catch ( IllegalAccessException e )
+        catch ( ReflectiveOperationException e )
         {
-            throw new DependencyGraphBuilderException( e.getMessage(), e );
+            throw exceptionHandler.create( e.getMessage(), e );
         }
-        catch ( InvocationTargetException e )
+    }
+
+    static <T extends Exception> Object invoke( Class<?> objectClazz, String staticMethod, Class<?> argClazz1,
+                                                Class<?> argClazz2, Object arg1, Object arg2,
+                                                ExceptionHandler<T> exceptionHandler )
+        throws T
+    {
+        try
         {
-            throw new DependencyGraphBuilderException( e.getMessage(), e );
+            return objectClazz.getMethod( staticMethod, argClazz1, argClazz2 ).invoke( null, arg1, arg2 );
         }
-        catch ( NoSuchMethodException e )
+        catch ( ReflectiveOperationException e )
         {
-            throw new DependencyGraphBuilderException( e.getMessage(), e );
+            throw exceptionHandler.create( e.getMessage(), e );
         }
     }
 }
