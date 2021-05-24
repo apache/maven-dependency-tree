@@ -47,6 +47,7 @@ import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.graph.DependencyFilter;
 import org.eclipse.aether.graph.Exclusion;
 import org.eclipse.aether.util.graph.manager.DependencyManagerUtils;
 import org.eclipse.aether.version.VersionConstraint;
@@ -126,6 +127,17 @@ public class Maven31DependencyGraphBuilder
         final DependencyResolutionRequest request = new DefaultDependencyResolutionRequest();
         request.setMavenProject( project );
         Invoker.invoke( request, "setRepositorySession", RepositorySystemSession.class, session );
+        // only download the poms, not the artifacts
+        DependencyFilter collectFilter = new DependencyFilter()
+        {
+            @Override
+            public boolean accept( org.eclipse.aether.graph.DependencyNode node,
+                                   List<org.eclipse.aether.graph.DependencyNode> parents )
+            {
+                return false;
+            }
+        };
+        Invoker.invoke( request, "setResolutionFilter", DependencyFilter.class, collectFilter );
 
         final DependencyResolutionResult result = resolveDependencies( request, reactorProjects );
         org.eclipse.aether.graph.DependencyNode graph =

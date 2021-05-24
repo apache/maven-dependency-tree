@@ -42,6 +42,7 @@ import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
+import org.sonatype.aether.graph.DependencyFilter;
 import org.sonatype.aether.graph.Dependency;
 import org.sonatype.aether.version.VersionConstraint;
 
@@ -94,6 +95,18 @@ public class Maven3DependencyGraphBuilder
 
         DependencyResolutionRequest request =
             new DefaultDependencyResolutionRequest( project, buildingRequest.getRepositorySession() );
+
+        // only download the poms, not the artifacts
+        DependencyFilter collectFilter = new DependencyFilter()
+        {
+            @Override
+            public boolean accept( org.sonatype.aether.graph.DependencyNode node,
+                                   List<org.sonatype.aether.graph.DependencyNode> parents )
+            {
+                return false;
+            }
+        };
+        request.setResolutionFilter( collectFilter );
 
         DependencyResolutionResult result = resolveDependencies( request, reactorProjects );
 
