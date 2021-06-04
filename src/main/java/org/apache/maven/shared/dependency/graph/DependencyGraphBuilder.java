@@ -45,20 +45,19 @@ public interface DependencyGraphBuilder
         throws DependencyGraphBuilderException;
 
     /**
-     * Build the dependency graph, with a hack to include dependencies contained in the reactor projects
-     * but that are not yet compiled, which is the minimum prerequisite for Maven core's
-     * ReactorReader to find them. Notice that this hack hasn't been done for Maven 2.
-     * <p>Notice: If Maven core did collect instead of resolving dependencies (ie did not try to get the
-     * artifacts but only the poms), probably this hack wouldn't be necessary even for people requiring
-     * the dependency graph before compiling. TODO: for Maven 3, use Aether to collect dependencies.</p>
      *
      * @param buildingRequest the buildingRequest
      * @param filter artifact filter (can be <code>null</code>)
-     * @param reactorProjects Collection of those projects contained in the reactor (can be <code>null</code>).
+     * @param reactorProjects ignored
      * @return the dependency graph
      * @throws DependencyGraphBuilderException if some of the dependencies could not be resolved.
+     * @deprecated Use {@link #buildDependencyGraph(ProjectBuildingRequest, ArtifactFilter)} instead
      */
-    DependencyNode buildDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter,
+    @Deprecated
+    default DependencyNode buildDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter,
                                          Collection<MavenProject> reactorProjects )
-        throws DependencyGraphBuilderException;
+        throws DependencyGraphBuilderException 
+    {
+      return buildDependencyGraph( buildingRequest, filter );    
+    }
 }

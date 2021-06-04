@@ -22,11 +22,8 @@ package org.apache.maven.shared.dependency.graph.internal;
 import static org.eclipse.aether.util.graph.manager.DependencyManagerUtils.NODE_DATA_PREMANAGED_VERSION;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
@@ -93,24 +90,6 @@ public class Maven31DependencyGraphBuilder
     public DependencyNode buildDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyGraphBuilderException
     {
-        return buildDependencyGraph( buildingRequest, filter, null );
-    }
-
-    /**
-     * Builds the dependency graph for Maven 3.1+, eventually hacking for collecting projects from
-     * reactor not yet built.
-     *
-     * @param buildingRequest the buildingRequest
-     * @param filter artifact filter (can be <code>null</code>)
-     * @param reactorProjects Collection of those projects contained in the reactor (can be <code>null</code>).
-     * @return DependencyNode containing the dependency graph.
-     * @throws DependencyGraphBuilderException if some of the dependencies could not be resolved.
-     */
-    @Override
-    public DependencyNode buildDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter,
-                                                Collection<MavenProject> reactorProjects )
-        throws DependencyGraphBuilderException
-    {
         MavenProject project = buildingRequest.getProject();
 
         RepositorySystemSession session =
@@ -139,7 +118,7 @@ public class Maven31DependencyGraphBuilder
         };
         Invoker.invoke( request, "setResolutionFilter", DependencyFilter.class, collectFilter );
 
-        final DependencyResolutionResult result = resolveDependencies( request, reactorProjects );
+        final DependencyResolutionResult result = resolveDependencies( request );
         org.eclipse.aether.graph.DependencyNode graph =
             (org.eclipse.aether.graph.DependencyNode) Invoker.invoke( DependencyResolutionResult.class, result,
                                                                       "getDependencyGraph", exceptionHandler );
@@ -147,8 +126,7 @@ public class Maven31DependencyGraphBuilder
         return buildDependencyNode( null, graph, project.getArtifact(), filter );
     }
 
-    private DependencyResolutionResult resolveDependencies( DependencyResolutionRequest request,
-                                                            Collection<MavenProject> reactorProjects )
+    private DependencyResolutionResult resolveDependencies( DependencyResolutionRequest request )
         throws DependencyGraphBuilderException
     {
         try
@@ -157,60 +135,9 @@ public class Maven31DependencyGraphBuilder
         }
         catch ( DependencyResolutionException e )
         {
-            if ( reactorProjects == null )
-            {
-                throw new DependencyGraphBuilderException( "Could not resolve following dependencies: "
-                    + e.getResult().getUnresolvedDependencies(), e );
-            }
-
-            // try collecting from reactor
-            return collectDependenciesFromReactor( e, reactorProjects );
+            throw new DependencyGraphBuilderException( "Could not resolve following dependencies: "
+                + e.getResult().getUnresolvedDependencies(), e );
         }
-    }
-
-    private DependencyResolutionResult collectDependenciesFromReactor( DependencyResolutionException e,
-                                                                       Collection<MavenProject> reactorProjects )
-        throws DependencyGraphBuilderException
-    {
-        DependencyResolutionResult result = e.getResult();
-
-        List<Dependency> reactorDeps = getReactorDependencies( reactorProjects, result.getUnresolvedDependencies() );
-        result.getUnresolvedDependencies().removeAll( reactorDeps );
-        Invoker.invoke( result.getResolvedDependencies(), "addAll", Collection.class, reactorDeps );
-
-        if ( !result.getUnresolvedDependencies().isEmpty() )
-        {
-            throw new DependencyGraphBuilderException( "Could not resolve nor collect following dependencies: "
-                + result.getUnresolvedDependencies(), e );
-        }
-
-        return result;
-    }
-
-    private List<Dependency> getReactorDependencies( Collection<MavenProject> reactorProjects, List<?> dependencies )
-    {
-        Set<ArtifactKey> reactorProjectsIds = new HashSet<ArtifactKey>();
-        for ( MavenProject project : reactorProjects )
-        {
-            reactorProjectsIds.add( new ArtifactKey( project ) );
-        }
-
-        List<Dependency> reactorDeps = new ArrayList<Dependency>();
-        for ( Object untypedDependency : dependencies )
-        {
-            Dependency dependency = (Dependency) untypedDependency;
-            org.eclipse.aether.artifact.Artifact depArtifact = dependency.getArtifact();
-
-            ArtifactKey key =
-                new ArtifactKey( depArtifact.getGroupId(), depArtifact.getArtifactId(), depArtifact.getVersion() );
-
-            if ( reactorProjectsIds.contains( key ) )
-            {
-                reactorDeps.add( dependency );
-            }
-        }
-
-        return reactorDeps;
     }
 
     private Artifact getDependencyArtifact( Dependency dep )

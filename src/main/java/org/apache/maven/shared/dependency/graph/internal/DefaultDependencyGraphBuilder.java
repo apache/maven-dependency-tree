@@ -34,8 +34,6 @@ import org.codehaus.plexus.context.ContextException;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
 
-import java.util.Collection;
-
 /**
  * Default dependency graph builder that detects current Maven version to delegate to either Maven 3.0 or 3.1+ specific
  * code.
@@ -64,22 +62,6 @@ public class DefaultDependencyGraphBuilder
     public DependencyNode buildDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyGraphBuilderException
     {
-        return buildDependencyGraph( buildingRequest, filter, null );
-    }
-
-    /**
-     * Builds a dependency graph.
-     *
-     * @param filter artifact filter (can be <code>null</code>)
-     * @param reactorProjects Collection of those projects contained in the reactor (can be <code>null</code>)
-     * @return DependencyNode containing the dependency graph.
-     * @throws DependencyGraphBuilderException if some of the dependencies could not be resolved.
-     */
-    @Override
-    public DependencyNode buildDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter,
-                                                Collection<MavenProject> reactorProjects )
-        throws DependencyGraphBuilderException
-    {
         try
         {
             String hint = isMaven31() ? "maven31" : "maven3";
@@ -95,7 +77,7 @@ public class DefaultDependencyGraphBuilder
                                 + effectiveGraphBuilder.getClass().getSimpleName() );
             }
 
-            return effectiveGraphBuilder.buildDependencyGraph( buildingRequest, filter, reactorProjects );
+            return effectiveGraphBuilder.buildDependencyGraph( buildingRequest, filter );
         }
         catch ( ComponentLookupException e )
         {
