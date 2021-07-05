@@ -21,13 +21,8 @@ import java.io.*;
 
 import org.codehaus.plexus.util.*;
 
-File outputFile = new File( basedir, "target/tree-M2.txt" );
-File expectedFile = new File( basedir, "expected-M2.txt" );
-if ( ! outputFile.exists() )
-{
-  outputFile = new File( basedir, "target/tree-M3.txt" );
-  expectedFile = new File( basedir, "expected-M3.txt" );
-}
+File outputFile = new File( basedir, "target/tree.txt" );
+File expectedFile = new File( basedir, "expected.txt" );
 
 String actual = FileUtils.fileRead( outputFile );
 String expected = FileUtils.fileRead( expectedFile );

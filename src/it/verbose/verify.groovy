@@ -17,23 +17,14 @@
  * under the License.
  */
 
-import java.io.*;
+def actual = new File( basedir, "target/tree-verbose.txt" ).readLines()
+// omitted for cycle not supported anymore, but should probably return
+// omitted for exclusion is not supported yet
+def expected = new File( basedir, "expected-verbose.txt" ).readLines().findAll{!((it.contains('omitted for cycle')||it.contains('omitted for exclusion')))}
 
-import org.codehaus.plexus.util.*;
+assert actual.equals( expected )
 
-String actual = FileUtils.fileRead( new File( basedir, "module-z-deps-y/target/tree.txt" ) );
-String expected = FileUtils.fileRead( new File( basedir, "expected-tree.txt" ) );
+actual = new File( basedir, "target/tree-default.txt" ).readLines()
+expected = new File( basedir, "expected-default.txt" ).readLines()
 
-actual = actual.replaceAll( "[\n\r]+", "\n" );
-expected = expected.replaceAll( "[\n\r]+", "\n" );
-
-System.out.println( "Checking module-z-deps-y dependency tree..." );
-
-if ( !actual.equals( expected ) )
-{
-    throw new Exception( "Unexpected dependency tree" );
-}
-
-File resolved = new File( basedir, "resolved-module-z-deps-y.txt" );
-
-return !resolved.exists();
+assert actual.equals( expected )

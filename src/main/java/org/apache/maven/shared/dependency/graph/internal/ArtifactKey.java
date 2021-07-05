@@ -19,6 +19,8 @@ package org.apache.maven.shared.dependency.graph.internal;
  * under the License.
  */
 
+import java.util.Objects;
+
 import org.apache.maven.project.MavenProject;
 
 /**
@@ -26,17 +28,17 @@ import org.apache.maven.project.MavenProject;
  */
 final class ArtifactKey
 {
-    private static final int HASH_PRIME = 31;
-
     private final String groupId;
     private final String artifactId;
     private final String version;
+    private final int hashCode;
 
     ArtifactKey( String groupId, String artifactId, String version )
     {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
+        this.hashCode = Objects.hash( groupId, artifactId, version );
     }
 
     ArtifactKey( MavenProject project )
@@ -65,9 +67,6 @@ final class ArtifactKey
     @Override
     public int hashCode()
     {
-        int result = groupId.hashCode();
-        result = HASH_PRIME * result + artifactId.hashCode();
-        result = HASH_PRIME * result + version.hashCode();
-        return result;
+        return hashCode;
     }
 }

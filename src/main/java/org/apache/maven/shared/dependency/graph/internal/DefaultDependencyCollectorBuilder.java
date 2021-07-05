@@ -19,7 +19,6 @@ package org.apache.maven.shared.dependency.graph.internal;
  * under the License.
  */
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingRequest;
@@ -50,8 +49,7 @@ public class DefaultDependencyCollectorBuilder
     protected PlexusContainer container;
 
     @Override
-    public DependencyNode collectDependencyGraph( ArtifactRepository localRepository,
-                                                ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
+    public DependencyNode collectDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyCollectorBuilderException
     {
         try
@@ -70,7 +68,7 @@ public class DefaultDependencyCollectorBuilder
                     + effectiveGraphBuilder.getClass().getSimpleName() );
             }
 
-            return effectiveGraphBuilder.collectDependencyGraph( localRepository, buildingRequest, filter );
+            return effectiveGraphBuilder.collectDependencyGraph( buildingRequest, filter );
         }
         catch ( ComponentLookupException e )
         {

@@ -78,6 +78,16 @@ public class DefaultDependencyNode implements DependencyNode
         this.optional = optional;
         this.exclusions = exclusions;
     }
+    
+    // user to refer to winner
+    public DefaultDependencyNode( Artifact artifact )
+    {
+        this.artifact = artifact;
+        this.parent = null;
+        this.premanagedScope = null;
+        this.premanagedVersion = null;
+        this.versionConstraint = null;
+    }
 
     /**
      * Applies the specified dependency node visitor to this dependency node and its children.
@@ -179,82 +189,6 @@ public class DefaultDependencyNode implements DependencyNode
 
         buffer.append( artifact );
 
-        ItemAppender appender = new ItemAppender( buffer, " (", "; ", ")" );
-
-        if ( getPremanagedVersion() != null )
-        {
-            appender.append( "version managed from ", getPremanagedVersion() );
-        }
-
-        if ( getPremanagedScope() != null )
-        {
-            appender.append( "scope managed from ", getPremanagedScope() );
-        }
-
-        if ( getVersionConstraint() != null )
-        {
-            appender.append( "version selected from constraint ", getVersionConstraint() );
-        }
-
-
-        appender.flush();
-        if ( optional != null && optional )
-        {
-            buffer.append( " (optional) " );
-        }
-
         return buffer.toString();
-    }
-
-    /**
-     * Utility class to concatenate a number of parameters with separator tokens.
-     */
-    private static class ItemAppender
-    {
-        private StringBuilder buffer;
-
-        private String startToken;
-
-        private String separatorToken;
-
-        private String endToken;
-
-        private boolean appended;
-
-        ItemAppender( StringBuilder buffer, String startToken, String separatorToken, String endToken )
-        {
-            this.buffer = buffer;
-            this.startToken = startToken;
-            this.separatorToken = separatorToken;
-            this.endToken = endToken;
-
-            appended = false;
-        }
-
-        public ItemAppender append( String item1, String item2 )
-        {
-            appendToken();
-
-            buffer.append( item1 ).append( item2 );
-
-            return this;
-        }
-
-        public void flush()
-        {
-            if ( appended )
-            {
-                buffer.append( endToken );
-
-                appended = false;
-            }
-        }
-
-        private void appendToken()
-        {
-            buffer.append( appended ? separatorToken : startToken );
-
-            appended = true;
-        }
     }
 }

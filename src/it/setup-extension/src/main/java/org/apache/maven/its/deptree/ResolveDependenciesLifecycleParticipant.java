@@ -76,16 +76,6 @@ public final class ResolveDependenciesLifecycleParticipant extends AbstractMaven
             log.info( "building dependency graph for project " + project.getArtifact() );
 
             File resolved = new File( basedir, "resolved-" + project.getArtifactId() + ".txt" );
-            try
-            {
-                log.info( "building with reactor projects" );
-                // No need to filter our search. We want to resolve all artifacts.
-                dependencyGraphBuilder.buildDependencyGraph( buildingRequest, null, projects );
-            }
-            catch ( DependencyGraphBuilderException e )
-            {
-                throw new MavenExecutionException( "Could not resolve dependencies for project: " + project, e );
-            }
 
             try
             {
@@ -95,7 +85,7 @@ public final class ResolveDependenciesLifecycleParticipant extends AbstractMaven
             }
             catch ( DependencyGraphBuilderException e )
             {
-                log.info( "expected resolution failure: " + e.getMessage() );
+                log.info( "unexpected resolution failure: " + e.getMessage() );
 
                 try
                 {

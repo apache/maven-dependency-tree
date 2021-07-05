@@ -89,8 +89,7 @@ public class Maven3DependencyCollectorBuilder
     }
 
     @Override
-    public DependencyNode collectDependencyGraph( ArtifactRepository localRepository,
-                                                ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
+    public DependencyNode collectDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyCollectorBuilderException
     {
         try

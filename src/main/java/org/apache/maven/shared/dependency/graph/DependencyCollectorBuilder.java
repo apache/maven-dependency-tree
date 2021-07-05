@@ -19,7 +19,6 @@ package org.apache.maven.shared.dependency.graph;
  * under the License.
  */
 
-import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.project.ProjectBuildingRequest;
 
@@ -43,8 +42,7 @@ public interface DependencyCollectorBuilder
      * @return the raw dependency tree
      * @throws DependencyGraphBuilderException if some of the dependencies could not be collected.
      */
-    DependencyNode collectDependencyGraph( ArtifactRepository localRepository, ProjectBuildingRequest buildingRequest,
-                                         ArtifactFilter filter )
+    DependencyNode collectDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyCollectorBuilderException;
 
 }

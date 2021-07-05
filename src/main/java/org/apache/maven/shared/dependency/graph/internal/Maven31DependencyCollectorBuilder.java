@@ -34,6 +34,7 @@ import org.apache.maven.shared.dependency.graph.DependencyCollectorBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyCollectorBuilderException;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.internal.maven31.Maven31DirectScopeDependencySelector;
+import org.apache.maven.shared.dependency.graph.internal.maven31.VerboseJavaScopeSelector;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
@@ -54,7 +55,6 @@ import org.eclipse.aether.util.graph.selector.ExclusionDependencySelector;
 import org.eclipse.aether.util.graph.selector.OptionalDependencySelector;
 import org.eclipse.aether.util.graph.transformer.ConflictResolver;
 import org.eclipse.aether.util.graph.transformer.JavaScopeDeriver;
-import org.eclipse.aether.util.graph.transformer.JavaScopeSelector;
 import org.eclipse.aether.util.graph.transformer.NearestVersionSelector;
 import org.eclipse.aether.util.graph.transformer.SimpleOptionalitySelector;
 import org.eclipse.aether.util.graph.visitor.TreeDependencyVisitor;
@@ -89,8 +89,7 @@ public class Maven31DependencyCollectorBuilder
     }
 
     @Override
-    public DependencyNode collectDependencyGraph( ArtifactRepository localRepository,
-                                                  ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
+    public DependencyNode collectDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyCollectorBuilderException
     {
         DefaultRepositorySystemSession session = null;
@@ -108,7 +107,7 @@ public class Maven31DependencyCollectorBuilder
             session = new DefaultRepositorySystemSession( repositorySession );
 
             DependencyGraphTransformer transformer =
-                new ConflictResolver( new NearestVersionSelector(), new JavaScopeSelector(),
+                new ConflictResolver( new NearestVersionSelector(), new VerboseJavaScopeSelector(),
                                       new SimpleOptionalitySelector(), new JavaScopeDeriver() );
             session.setDependencyGraphTransformer( transformer );
 
@@ -276,10 +275,25 @@ public class Maven31DependencyCollectorBuilder
             }
         }
 
-        DefaultDependencyNode current =
-            new DefaultDependencyNode( parent, artifact, premanagedVersion, premanagedScope,
+        org.eclipse.aether.graph.DependencyNode winner =
+            (org.eclipse.aether.graph.DependencyNode) node.getData().get( ConflictResolver.NODE_DATA_WINNER );
+        String winnerVersion = null;
+        String ignoredScope = null;
+        if ( winner != null )
+        {
+            winnerVersion = winner.getArtifact().getBaseVersion();
+        }
+        else
+        {
+            ignoredScope = (String) node.getData().get( VerboseJavaScopeSelector.REDUCED_SCOPE );
+        }
+        
+        ConflictData data = new ConflictData( winnerVersion, ignoredScope );
+        
+        VerboseDependencyNode current =
+            new VerboseDependencyNode( parent, artifact, premanagedVersion, premanagedScope,
                                        getVersionSelectedFromRange( node.getVersionConstraint() ), optional,
-                                       exclusions );
+                                       exclusions, data );
 
         List<DependencyNode> nodes = new ArrayList<DependencyNode>( node.getChildren().size() );
         for ( org.eclipse.aether.graph.DependencyNode child : node.getChildren() )
@@ -306,5 +320,4 @@ public class Maven31DependencyCollectorBuilder
 
         return constraint.getRange().toString();
     }
-
 }
