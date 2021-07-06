@@ -20,6 +20,7 @@ package org.apache.maven.shared.dependency.graph.internal;
  */
 
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
+import org.apache.maven.execution.MavenSession;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.shared.dependency.graph.DependencyCollectorBuilder;
@@ -81,20 +82,15 @@ public class DefaultDependencyCollectorBuilder
      */
     protected static boolean isMaven31()
     {
-        return canFindCoreClass( "org.eclipse.aether.artifact.Artifact" ); // Maven 3.1 specific
-    }
-
-    private static boolean canFindCoreClass( String className )
-    {
         try
         {
-            Thread.currentThread().getContextClassLoader().loadClass( className );
-
-            return true;
+            Class<?> repoSessionClass =  MavenSession.class.getMethod( "getRepositorySession" ).getReturnType();
+            
+            return "org.eclipse.aether.RepositorySystemSession".equals( repoSessionClass.getName() );
         }
-        catch ( ClassNotFoundException e )
+        catch ( NoSuchMethodException e )
         {
-            return false;
+            throw new IllegalStateException( "Cannot determine return type of MavenSession.getRepositorySession" );
         }
     }
 
