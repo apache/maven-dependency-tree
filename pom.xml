@@ -28,7 +28,7 @@
   </parent>
 
   <artifactId>maven-dependency-tree</artifactId>
-  <version>3.1.0</version>
+  <version>3.1.1-SNAPSHOT</version>
 
   <name>Apache Maven Dependency Tree</name>
   <description>A tree-based API for resolution of Maven project dependencies</description>
@@ -56,7 +56,7 @@
 
   <properties>
 	<javaVersion>8</javaVersion>
-    <project.build.outputTimestamp>2021-07-08T10:19:18Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2021-07-08T10:21:55Z</project.build.outputTimestamp>
   </properties>
 
   <contributors>
