@@ -35,10 +35,10 @@ import org.apache.maven.shared.dependency.graph.DependencyCollectorBuilderExcept
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.internal.maven30.ConflictResolver;
 import org.apache.maven.shared.dependency.graph.internal.maven30.JavaScopeDeriver;
-import org.apache.maven.shared.dependency.graph.internal.maven30.JavaScopeSelector;
 import org.apache.maven.shared.dependency.graph.internal.maven30.Maven3DirectScopeDependencySelector;
 import org.apache.maven.shared.dependency.graph.internal.maven30.NearestVersionSelector;
 import org.apache.maven.shared.dependency.graph.internal.maven30.SimpleOptionalitySelector;
+import org.apache.maven.shared.dependency.graph.internal.maven30.VerboseJavaScopeSelector;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
@@ -107,7 +107,7 @@ public class Maven3DependencyCollectorBuilder
             DefaultRepositorySystemSession session = new DefaultRepositorySystemSession( repositorySystemSession );
 
             DependencyGraphTransformer transformer =
-                new ConflictResolver( new NearestVersionSelector(), new JavaScopeSelector(),
+                new ConflictResolver( new NearestVersionSelector(), new VerboseJavaScopeSelector(),
                                       new SimpleOptionalitySelector(), new JavaScopeDeriver() );
             session.setDependencyGraphTransformer( transformer );
 
@@ -281,10 +281,25 @@ public class Maven3DependencyCollectorBuilder
             }
         }
 
-        DefaultDependencyNode current =
-            new DefaultDependencyNode( parent, artifact, premanagedVersion, premanagedScope,
-                                       getVersionSelectedFromRange( node.getVersionConstraint() ), optional,
-                                       exclusions );
+        org.sonatype.aether.graph.DependencyNode winner =
+            (org.sonatype.aether.graph.DependencyNode) node.getData().get( ConflictResolver.NODE_DATA_WINNER );
+        String winnerVersion = null;
+        String ignoredScope = null;
+        if ( winner != null )
+        {
+            winnerVersion = winner.getVersion().toString();
+        }
+        else
+        {
+            ignoredScope = (String) node.getData().get( VerboseJavaScopeSelector.REDUCED_SCOPE );
+        }
+
+        ConflictData data = new ConflictData( winnerVersion, ignoredScope );
+
+        VerboseDependencyNode current =
+            new VerboseDependencyNode( parent, artifact, premanagedVersion, premanagedScope,
+                                       getVersionSelectedFromRange( node.getVersionConstraint() ), optional, exclusions,
+                                       data );
 
         List<DependencyNode> nodes = new ArrayList<DependencyNode>( node.getChildren().size() );
         for ( org.sonatype.aether.graph.DependencyNode child : node.getChildren() )
