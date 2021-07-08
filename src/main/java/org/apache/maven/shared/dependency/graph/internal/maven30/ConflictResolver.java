@@ -52,8 +52,8 @@ public final class ConflictResolver
 {
 
     /**
-     * The key in the repository session's {@link RepositorySystemSession#getConfigProperties() configuration
-     * properties} used to store a {@link Boolean} flag controlling the transformer's verbose mode.
+     * The key in the repository session's {@link org.sonatype.aether.RepositorySystemSession#getConfigProperties()
+     * configuration properties} used to store a {@link Boolean} flag controlling the transformer's verbose mode.
      */
     public static final String CONFIG_PROP_VERBOSE = "aether.conflictResolver.verbose";
 

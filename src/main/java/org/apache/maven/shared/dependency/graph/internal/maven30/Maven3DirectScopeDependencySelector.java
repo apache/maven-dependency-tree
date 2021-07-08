@@ -27,7 +27,7 @@ import org.sonatype.aether.graph.Dependency;
  * A dependency selector that excludes dependencies of an specific Scope which occur beyond level one of the dependency
  * graph.
  * 
- * @see {@link Dependency#getScope()}
+ * @see Dependency#getScope()
  * @author Gabriel Belingueres
  * @since 3.1.0
  */

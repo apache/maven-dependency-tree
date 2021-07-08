@@ -36,11 +36,10 @@ public interface DependencyCollectorBuilder
      * collect the project's raw dependency graph, with information to allow the API client to reason on its own about
      * dependencies.
      * 
-     * @param localRepository the local repository.
      * @param buildingRequest the request with the project to process its dependencies.
      * @param filter an artifact filter if not all dependencies are required (can be <code>null</code>)
      * @return the raw dependency tree
-     * @throws DependencyGraphBuilderException if some of the dependencies could not be collected.
+     * @throws DependencyCollectorBuilderException if some of the dependencies could not be collected.
      */
     DependencyNode collectDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyCollectorBuilderException;
