@@ -133,7 +133,7 @@ public class Maven31DependencyCollectorBuilder
                                                                                        exceptionHandler );
 
             CollectRequest collectRequest = new CollectRequest();
-            collectRequest.setRoot( new org.eclipse.aether.graph.Dependency( aetherArtifact, "" ) );
+            collectRequest.setRootArtifact( aetherArtifact );
             collectRequest.setRepositories( aetherRepos );
 
             org.eclipse.aether.artifact.ArtifactTypeRegistry stereotypes = session.getArtifactTypeRegistry();
