@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.maven.shared.dependency.graph.internal.maven30.ConflictResolver.ConflictContext;
 import org.apache.maven.shared.dependency.graph.internal.maven30.ConflictResolver.ConflictItem;
@@ -143,13 +142,7 @@ public final class NearestVersionSelector
 
     private UnsolvableVersionConflictException newFailure( final ConflictContext context )
     {
-        DependencyFilter filter = new DependencyFilter()
-        {
-            public boolean accept( DependencyNode node, List<DependencyNode> parents )
-            {
-                return context.isIncluded( node );
-            }
-        };
+        DependencyFilter filter = ( node, parents ) -> context.isIncluded( node );
         PathRecordingDependencyVisitor visitor = new PathRecordingDependencyVisitor( filter );
         context.getRoot().accept( visitor );
         return new UnsolvableVersionConflictException( visitor.getPaths(), context.conflictId );
@@ -167,8 +160,8 @@ public final class NearestVersionSelector
 
         ConflictGroup()
         {
-            constraints = new HashSet<VersionConstraint>();
-            candidates = new ArrayList<ConflictItem>( 64 );
+            constraints = new HashSet<>();
+            candidates = new ArrayList<>( 64 );
         }
 
         @Override

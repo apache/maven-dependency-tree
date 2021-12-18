@@ -78,14 +78,7 @@ public class Maven3DependencyCollectorBuilder
     
     public Maven3DependencyCollectorBuilder()
     {
-        this.exceptionHandler = new ExceptionHandler<DependencyCollectorBuilderException>()
-        {
-            @Override
-            public DependencyCollectorBuilderException create( String message, Exception exception )
-            {
-                return new DependencyCollectorBuilderException( message, exception );
-            }
-        };
+        this.exceptionHandler = DependencyCollectorBuilderException::new;
     }
 
     @Override
@@ -225,12 +218,10 @@ public class Maven3DependencyCollectorBuilder
                                                                     Dependency dependency )
         throws DependencyCollectorBuilderException
     {
-        org.sonatype.aether.graph.Dependency aetherDep =
-            (org.sonatype.aether.graph.Dependency) Invoker.invoke( RepositoryUtils.class, "toDependency",
-                                                                  Dependency.class,
-                                                                   org.sonatype.aether.artifact.ArtifactTypeRegistry.class,
-                                                                  dependency, stereotypes, exceptionHandler );
-        return aetherDep;
+        return (org.sonatype.aether.graph.Dependency) Invoker.invoke( RepositoryUtils.class, "toDependency",
+                                                              Dependency.class,
+                                                               ArtifactTypeRegistry.class,
+                                                              dependency, stereotypes, exceptionHandler );
     }
     // CHECKSTYLE_ON: LineLength
 
@@ -301,7 +292,7 @@ public class Maven3DependencyCollectorBuilder
                                        getVersionSelectedFromRange( node.getVersionConstraint() ), optional, exclusions,
                                        data );
 
-        List<DependencyNode> nodes = new ArrayList<DependencyNode>( node.getChildren().size() );
+        List<DependencyNode> nodes = new ArrayList<>( node.getChildren().size() );
         for ( org.sonatype.aether.graph.DependencyNode child : node.getChildren() )
         {
             Artifact childArtifact = getDependencyArtifact( child.getDependency() );

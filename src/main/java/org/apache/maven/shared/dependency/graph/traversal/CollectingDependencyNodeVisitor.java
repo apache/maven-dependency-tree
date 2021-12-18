@@ -49,7 +49,7 @@ public class CollectingDependencyNodeVisitor
      */
     public CollectingDependencyNodeVisitor()
     {
-        nodes = new ArrayList<DependencyNode>();
+        nodes = new ArrayList<>();
     }
 
     // DependencyNodeVisitor methods ------------------------------------------

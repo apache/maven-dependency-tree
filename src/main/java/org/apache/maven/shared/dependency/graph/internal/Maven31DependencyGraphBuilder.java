@@ -68,14 +68,7 @@ public class Maven31DependencyGraphBuilder
     
     public Maven31DependencyGraphBuilder()
     {
-        this.exceptionHandler = new ExceptionHandler<DependencyGraphBuilderException>()
-        {
-            @Override
-            public DependencyGraphBuilderException create( String message, Exception exception )
-            {
-                return new DependencyGraphBuilderException( message, exception );
-            }
-        };
+        this.exceptionHandler = DependencyGraphBuilderException::new;
     }
 
     /**
@@ -96,7 +89,7 @@ public class Maven31DependencyGraphBuilder
             (RepositorySystemSession) Invoker.invoke( buildingRequest, "getRepositorySession", exceptionHandler );
 
         
-        if ( Boolean.TRUE != ( (Boolean) session.getConfigProperties().get( NODE_DATA_PREMANAGED_VERSION ) ) )
+        if ( Boolean.TRUE != session.getConfigProperties().get( NODE_DATA_PREMANAGED_VERSION ) )
         {
             DefaultRepositorySystemSession newSession = new DefaultRepositorySystemSession( session );
             newSession.setConfigProperty( NODE_DATA_PREMANAGED_VERSION, true );
@@ -107,15 +100,7 @@ public class Maven31DependencyGraphBuilder
         request.setMavenProject( project );
         Invoker.invoke( request, "setRepositorySession", RepositorySystemSession.class, session );
         // only download the poms, not the artifacts
-        DependencyFilter collectFilter = new DependencyFilter()
-        {
-            @Override
-            public boolean accept( org.eclipse.aether.graph.DependencyNode node,
-                                   List<org.eclipse.aether.graph.DependencyNode> parents )
-            {
-                return false;
-            }
-        };
+        DependencyFilter collectFilter = ( node, parents ) -> false;
         Invoker.invoke( request, "setResolutionFilter", DependencyFilter.class, collectFilter );
 
         final DependencyResolutionResult result = resolveDependencies( request );
@@ -186,7 +171,7 @@ public class Maven31DependencyGraphBuilder
                                        getVersionSelectedFromRange( node.getVersionConstraint() ),
                                        optional, exclusions );
 
-        List<DependencyNode> nodes = new ArrayList<DependencyNode>( node.getChildren().size() );
+        List<DependencyNode> nodes = new ArrayList<>( node.getChildren().size() );
         for ( org.eclipse.aether.graph.DependencyNode child : node.getChildren() )
         {
             Artifact childArtifact = getDependencyArtifact( child.getDependency() );

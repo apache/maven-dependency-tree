@@ -52,7 +52,7 @@ public class AndDependencyNodeFilter
      */
     public AndDependencyNodeFilter( DependencyNodeFilter filter1, DependencyNodeFilter filter2 )
     {
-        this( Arrays.asList( new DependencyNodeFilter[] { filter1, filter2 } ) );
+        this( Arrays.asList( filter1, filter2 ) );
     }
 
     /**

@@ -76,15 +76,7 @@ public class Maven3DependencyGraphBuilder
             new DefaultDependencyResolutionRequest( project, buildingRequest.getRepositorySession() );
 
         // only download the poms, not the artifacts
-        DependencyFilter collectFilter = new DependencyFilter()
-        {
-            @Override
-            public boolean accept( org.sonatype.aether.graph.DependencyNode node,
-                                   List<org.sonatype.aether.graph.DependencyNode> parents )
-            {
-                return false;
-            }
-        };
+        DependencyFilter collectFilter = ( node, parents ) -> false;
         request.setResolutionFilter( collectFilter );
 
         DependencyResolutionResult result = resolveDependencies( request );
@@ -125,7 +117,7 @@ public class Maven3DependencyGraphBuilder
                                        null /* node.getPremanagedScope() */,
                                        getVersionSelectedFromRange( node.getVersionConstraint() ) );
 
-        List<DependencyNode> nodes = new ArrayList<DependencyNode>( node.getChildren().size() );
+        List<DependencyNode> nodes = new ArrayList<>( node.getChildren().size() );
         for ( org.sonatype.aether.graph.DependencyNode child : node.getChildren() )
         {
             Artifact childArtifact = getDependencyArtifact( child.getDependency() );

@@ -185,10 +185,6 @@ public class DefaultDependencyNode implements DependencyNode
     @Override
     public String toNodeString()
     {
-        StringBuilder buffer = new StringBuilder();
-
-        buffer.append( artifact );
-
-        return buffer.toString();
+        return String.valueOf( artifact );
     }
 }
