@@ -187,19 +187,6 @@
               <packages>org.apache.maven.shared.dependency.graph*</packages>
             </group>
           </groups>
-          <tags>
-          <!-- from org.eclipse.aether:aether:1.1.0 -->
-            <tag>
-              <name>noinstantiate</name>
-              <placement>a</placement>
-              <head>Restriction:</head>
-            </tag>
-            <tag>
-              <name>noreference</name>
-              <placement>a</placement>
-              <head>Restriction:</head>
-            </tag>
-          </tags>
         </configuration>
       </plugin>
     </plugins>
