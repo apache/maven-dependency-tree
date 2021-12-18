@@ -102,6 +102,22 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.3.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.1.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.9.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.codehaus.plexus</groupId>
@@ -128,8 +144,6 @@
           <properties>
             <maven.compiler.source>${maven.compiler.source}</maven.compiler.source>
             <maven.compiler.target>${maven.compiler.target}</maven.compiler.target>
-            <!-- e.g. ensure that Java7 picks up TLSv1.2 when connecting with Central -->
-            <https.protocols>${https.protocols}</https.protocols>
           </properties>
         </configuration>
         <executions>
