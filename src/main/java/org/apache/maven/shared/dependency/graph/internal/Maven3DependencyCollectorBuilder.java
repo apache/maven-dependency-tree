@@ -106,6 +106,7 @@ public class Maven3DependencyCollectorBuilder
 
             DependencySelector depFilter =
                 new AndDependencySelector( new Maven3DirectScopeDependencySelector( JavaScopes.TEST ),
+                                           new Maven3DirectScopeDependencySelector( JavaScopes.PROVIDED ),
                                            new OptionalDependencySelector(), 
                                            new ExclusionDependencySelector() );
             session.setDependencySelector( depFilter );
