@@ -19,92 +19,262 @@ package org.apache.maven.shared.dependency.graph.internal;
  * under the License.
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.maven.RepositoryUtils;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.repository.ArtifactRepository;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
-import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.shared.dependency.graph.DependencyCollectorBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyCollectorBuilderException;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
-import org.codehaus.plexus.PlexusConstants;
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.codehaus.plexus.context.Context;
-import org.codehaus.plexus.context.ContextException;
-import org.codehaus.plexus.logging.AbstractLogEnabled;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
+import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.artifact.ArtifactTypeRegistry;
+import org.eclipse.aether.collection.CollectRequest;
+import org.eclipse.aether.collection.CollectResult;
+import org.eclipse.aether.collection.DependencyCollectionException;
+import org.eclipse.aether.collection.DependencyGraphTransformer;
+import org.eclipse.aether.collection.DependencySelector;
+import org.eclipse.aether.graph.DependencyVisitor;
+import org.eclipse.aether.graph.Exclusion;
+import org.eclipse.aether.util.artifact.JavaScopes;
+import org.eclipse.aether.util.graph.manager.DependencyManagerUtils;
+import org.eclipse.aether.util.graph.selector.AndDependencySelector;
+import org.eclipse.aether.util.graph.selector.ExclusionDependencySelector;
+import org.eclipse.aether.util.graph.selector.OptionalDependencySelector;
+import org.eclipse.aether.util.graph.transformer.ConflictResolver;
+import org.eclipse.aether.util.graph.transformer.JavaScopeDeriver;
+import org.eclipse.aether.util.graph.transformer.NearestVersionSelector;
+import org.eclipse.aether.util.graph.transformer.SimpleOptionalitySelector;
+import org.eclipse.aether.util.graph.visitor.TreeDependencyVisitor;
+import org.eclipse.aether.version.VersionConstraint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Default project dependency raw dependency collector API, providing an abstraction layer against Maven 3 and Maven
- * 3.1+ particular Aether implementations.
+ * Project dependency raw dependency collector API, abstracting Maven 3.1+'s Aether implementation.
  * 
  * @author Gabriel Belingueres
  * @since 3.1.0
  */
-@Component( role = DependencyCollectorBuilder.class )
+@Named
 public class DefaultDependencyCollectorBuilder
-    extends AbstractLogEnabled
-    implements DependencyCollectorBuilder, Contextualizable
+    implements DependencyCollectorBuilder
 {
-    protected PlexusContainer container;
+    private static final Logger LOGGER = LoggerFactory.getLogger( DefaultDependencyCollectorBuilder.class );
+
+    private final RepositorySystem repositorySystem;
+
+    @Inject
+    public DefaultDependencyCollectorBuilder( RepositorySystem repositorySystem )
+    {
+        this.repositorySystem = repositorySystem;
+    }
 
     @Override
     public DependencyNode collectDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyCollectorBuilderException
     {
+        DefaultRepositorySystemSession session = null;
         try
         {
-            String hint = isMaven31() ? "maven31" : "maven3";
+            MavenProject project = buildingRequest.getProject();
 
-            DependencyCollectorBuilder effectiveGraphBuilder =
-                (DependencyCollectorBuilder) container.lookup( DependencyCollectorBuilder.class.getCanonicalName(),
-                                                               hint );
+            Artifact projectArtifact = project.getArtifact();
+            List<ArtifactRepository> remoteArtifactRepositories = project.getRemoteArtifactRepositories();
 
-            if ( getLogger().isDebugEnabled() )
+            RepositorySystemSession repositorySession = buildingRequest.getRepositorySession();
+
+            session = new DefaultRepositorySystemSession( repositorySession );
+
+            DependencyGraphTransformer transformer =
+                new ConflictResolver( new NearestVersionSelector(), new VerboseJavaScopeSelector(),
+                                      new SimpleOptionalitySelector(), new JavaScopeDeriver() );
+            session.setDependencyGraphTransformer( transformer );
+
+            DependencySelector depFilter =
+                new AndDependencySelector( new DirectScopeDependencySelector( JavaScopes.TEST ),
+                                           new DirectScopeDependencySelector( JavaScopes.PROVIDED ),
+                                           new OptionalDependencySelector(),
+                                           new ExclusionDependencySelector() );
+            session.setDependencySelector( depFilter );
+
+            session.setConfigProperty( ConflictResolver.CONFIG_PROP_VERBOSE, true );
+            session.setConfigProperty( DependencyManagerUtils.CONFIG_PROP_VERBOSE, true );
+
+            org.eclipse.aether.artifact.Artifact aetherArtifact = RepositoryUtils.toArtifact( projectArtifact );
+
+            List<org.eclipse.aether.repository.RemoteRepository> aetherRepos =
+                RepositoryUtils.toRepos( remoteArtifactRepositories );
+
+            CollectRequest collectRequest = new CollectRequest();
+            collectRequest.setRootArtifact( aetherArtifact );
+            collectRequest.setRepositories( aetherRepos );
+
+            org.eclipse.aether.artifact.ArtifactTypeRegistry stereotypes = session.getArtifactTypeRegistry();
+            collectDependencyList( collectRequest, project, stereotypes );
+            collectManagedDependencyList( collectRequest, project, stereotypes );
+
+            CollectResult collectResult = repositorySystem.collectDependencies( session, collectRequest );
+
+            org.eclipse.aether.graph.DependencyNode rootNode = collectResult.getRoot();
+
+            if ( LOGGER.isDebugEnabled() )
             {
-                MavenProject project = buildingRequest.getProject();
-
-                getLogger().debug( "building " + hint + " RAW dependency tree for " + project.getId() + " with "
-                    + effectiveGraphBuilder.getClass().getSimpleName() );
+                logTree( rootNode );
             }
 
-            return effectiveGraphBuilder.collectDependencyGraph( buildingRequest, filter );
+            return buildDependencyNode( null, rootNode, projectArtifact, filter );
         }
-        catch ( ComponentLookupException e )
+        catch ( DependencyCollectionException e )
         {
-            throw new DependencyCollectorBuilderException( e.getMessage(), e );
+            throw new DependencyCollectorBuilderException( "Could not collect dependencies: " + e.getResult(), e );
+        }
+        finally
+        {
+            if ( session != null )
+            {
+                session.setReadOnly();
+            }
         }
     }
 
-    /**
-     * @return true if the current Maven version is Maven 3.1.
-     */
-    protected static boolean isMaven31()
+    private void logTree( org.eclipse.aether.graph.DependencyNode rootNode )
     {
-        try
+        // print the node tree with its associated data Map
+        rootNode.accept( new TreeDependencyVisitor( new DependencyVisitor()
         {
-            Class<?> repoSessionClass =  MavenSession.class.getMethod( "getRepositorySession" ).getReturnType();
-            
-            return "org.eclipse.aether.RepositorySystemSession".equals( repoSessionClass.getName() );
-        }
-        catch ( NoSuchMethodException e )
-        {
-            throw new IllegalStateException( "Cannot determine return type of MavenSession.getRepositorySession" );
-        }
+            String indent = "";
+
+            @Override
+            public boolean visitEnter( org.eclipse.aether.graph.DependencyNode dependencyNode )
+            {
+                LOGGER.debug( "{}Aether node: {} data map: {}", indent, dependencyNode, dependencyNode.getData() );
+                indent += "    ";
+                return true;
+            }
+
+            @Override
+            public boolean visitLeave( org.eclipse.aether.graph.DependencyNode dependencyNode )
+            {
+                indent = indent.substring( 0, indent.length() - 4 );
+                return true;
+            }
+        } ) );
     }
 
-    /**
-     * Injects the Plexus content.
-     *
-     * @param context Plexus context to inject.
-     * @throws ContextException if the PlexusContainer could not be located.
-     */
-    @Override
-    public void contextualize( Context context )
-        throws ContextException
+    private void collectManagedDependencyList( CollectRequest collectRequest, MavenProject project,
+                                               ArtifactTypeRegistry stereotypes )
     {
-        container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
+        if ( project.getDependencyManagement() != null )
+        {
+            for ( Dependency dependency : project.getDependencyManagement().getDependencies() )
+            {
+                org.eclipse.aether.graph.Dependency aetherDep = RepositoryUtils.toDependency( dependency, stereotypes );
+                collectRequest.addManagedDependency( aetherDep );
+            }
+        }
     }
 
+    private void collectDependencyList( CollectRequest collectRequest, MavenProject project,
+                                        org.eclipse.aether.artifact.ArtifactTypeRegistry stereotypes )
+    {
+        for ( Dependency dependency : project.getDependencies() )
+        {
+            org.eclipse.aether.graph.Dependency aetherDep = RepositoryUtils.toDependency( dependency, stereotypes );
+            collectRequest.addDependency( aetherDep );
+        }
+    }
+
+    private Artifact getDependencyArtifact( org.eclipse.aether.graph.Dependency dep )
+    {
+        org.eclipse.aether.artifact.Artifact artifact = dep.getArtifact();
+
+        Artifact mavenArtifact = RepositoryUtils.toArtifact( artifact );
+        mavenArtifact.setScope( dep.getScope() );
+        mavenArtifact.setOptional( dep.isOptional() );
+
+        return mavenArtifact;
+    }
+
+    private DependencyNode buildDependencyNode( DependencyNode parent, org.eclipse.aether.graph.DependencyNode node,
+                                                Artifact artifact, ArtifactFilter filter )
+    {
+        String premanagedVersion = DependencyManagerUtils.getPremanagedVersion( node );
+        String premanagedScope = DependencyManagerUtils.getPremanagedScope( node );
+
+        Boolean optional = null;
+        if ( node.getDependency() != null )
+        {
+            optional = node.getDependency().isOptional();
+        }
+        
+        List<org.apache.maven.model.Exclusion> exclusions = null;
+        if ( node.getDependency() != null )
+        {
+            exclusions = new ArrayList<>( node.getDependency().getExclusions().size() );
+            for ( Exclusion exclusion : node.getDependency().getExclusions() )
+            {
+                org.apache.maven.model.Exclusion modelExclusion = new org.apache.maven.model.Exclusion();
+                modelExclusion.setGroupId( exclusion.getGroupId() );
+                modelExclusion.setArtifactId( exclusion.getArtifactId() );
+                exclusions.add( modelExclusion );
+            }
+        }
+
+        org.eclipse.aether.graph.DependencyNode winner =
+            (org.eclipse.aether.graph.DependencyNode) node.getData().get( ConflictResolver.NODE_DATA_WINNER );
+        String winnerVersion = null;
+        String ignoredScope = null;
+        if ( winner != null )
+        {
+            winnerVersion = winner.getArtifact().getBaseVersion();
+        }
+        else
+        {
+            ignoredScope = (String) node.getData().get( VerboseJavaScopeSelector.REDUCED_SCOPE );
+        }
+        
+        ConflictData data = new ConflictData( winnerVersion, ignoredScope );
+        
+        VerboseDependencyNode current =
+            new VerboseDependencyNode( parent, artifact, premanagedVersion, premanagedScope,
+                                       getVersionSelectedFromRange( node.getVersionConstraint() ), optional,
+                                       exclusions, data );
+
+        List<DependencyNode> nodes = new ArrayList<>( node.getChildren().size() );
+        for ( org.eclipse.aether.graph.DependencyNode child : node.getChildren() )
+        {
+            Artifact childArtifact = getDependencyArtifact( child.getDependency() );
+
+            if ( ( filter == null ) || filter.include( childArtifact ) )
+            {
+                nodes.add( buildDependencyNode( current, child, childArtifact, filter ) );
+            }
+        }
+
+        current.setChildren( Collections.unmodifiableList( nodes ) );
+
+        return current;
+    }
+
+    private String getVersionSelectedFromRange( VersionConstraint constraint )
+    {
+        if ( ( constraint == null ) || ( constraint.getVersion() != null ) )
+        {
+            return null;
+        }
+
+        return constraint.getRange().toString();
+    }
 }

@@ -19,40 +19,57 @@ package org.apache.maven.shared.dependency.graph.internal;
  * under the License.
  */
 
+import static org.eclipse.aether.util.graph.manager.DependencyManagerUtils.NODE_DATA_PREMANAGED_VERSION;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import org.apache.maven.RepositoryUtils;
+import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
-import org.apache.maven.execution.MavenSession;
+import org.apache.maven.project.DefaultDependencyResolutionRequest;
+import org.apache.maven.project.DependencyResolutionException;
+import org.apache.maven.project.DependencyResolutionRequest;
+import org.apache.maven.project.DependencyResolutionResult;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.project.ProjectDependenciesResolver;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
-import org.codehaus.plexus.PlexusConstants;
-import org.codehaus.plexus.PlexusContainer;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
-import org.codehaus.plexus.context.Context;
-import org.codehaus.plexus.context.ContextException;
-import org.codehaus.plexus.logging.AbstractLogEnabled;
-import org.codehaus.plexus.personality.plexus.lifecycle.phase.Contextualizable;
+import org.eclipse.aether.DefaultRepositorySystemSession;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.graph.Dependency;
+import org.eclipse.aether.graph.DependencyFilter;
+import org.eclipse.aether.graph.Exclusion;
+import org.eclipse.aether.util.graph.manager.DependencyManagerUtils;
+import org.eclipse.aether.version.VersionConstraint;
 
 /**
- * Default dependency graph builder that detects current Maven version to delegate to either Maven 3.0 or 3.1+ specific
- * code.
+ * Wrapper around Eclipse Aether dependency resolver, used in Maven 3.1.
  *
- * @see Maven3DependencyGraphBuilder
- * @see Maven31DependencyGraphBuilder
+ * @see ProjectDependenciesResolver
  * @author Hervé Boutemy
- * @since 2.0
+ * @since 2.1
  */
-@Component( role = DependencyGraphBuilder.class )
+@Named
 public class DefaultDependencyGraphBuilder
-    extends AbstractLogEnabled
-    implements DependencyGraphBuilder, Contextualizable
+    implements DependencyGraphBuilder
 {
-    protected PlexusContainer container;
+    private final ProjectDependenciesResolver resolver;
+
+    @Inject
+    public DefaultDependencyGraphBuilder( ProjectDependenciesResolver resolver )
+    {
+        this.resolver = resolver;
+    }
 
     /**
-     * Builds a dependency graph.
+     * Builds the dependency graph for Maven 3.1+.
      *
      * @param buildingRequest the buildingRequest
      * @param filter artifact filter (can be <code>null</code>)
@@ -63,56 +80,105 @@ public class DefaultDependencyGraphBuilder
     public DependencyNode buildDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
         throws DependencyGraphBuilderException
     {
+        MavenProject project = buildingRequest.getProject();
+
+        RepositorySystemSession session = buildingRequest.getRepositorySession();
+        
+        if ( Boolean.TRUE != session.getConfigProperties().get( NODE_DATA_PREMANAGED_VERSION ) )
+        {
+            DefaultRepositorySystemSession newSession = new DefaultRepositorySystemSession( session );
+            newSession.setConfigProperty( NODE_DATA_PREMANAGED_VERSION, true );
+            session = newSession;
+        }         
+
+        final DependencyResolutionRequest request = new DefaultDependencyResolutionRequest();
+        request.setMavenProject( project );
+        request.setRepositorySession( session );
+        // only download the poms, not the artifacts
+        DependencyFilter collectFilter = ( node, parents ) -> false;
+        request.setResolutionFilter( collectFilter );
+
+        final DependencyResolutionResult result = resolveDependencies( request );
+
+        org.eclipse.aether.graph.DependencyNode graph = result.getDependencyGraph();
+
+        return buildDependencyNode( null, graph, project.getArtifact(), filter );
+    }
+
+    private DependencyResolutionResult resolveDependencies( DependencyResolutionRequest request )
+        throws DependencyGraphBuilderException
+    {
         try
         {
-            String hint = isMaven31() ? "maven31" : "maven3";
+            return resolver.resolve( request );
+        }
+        catch ( DependencyResolutionException e )
+        {
+            throw new DependencyGraphBuilderException( "Could not resolve following dependencies: "
+                + e.getResult().getUnresolvedDependencies(), e );
+        }
+    }
 
-            DependencyGraphBuilder effectiveGraphBuilder =
-                (DependencyGraphBuilder) container.lookup( DependencyGraphBuilder.class.getCanonicalName(), hint );
-            
-            if ( getLogger().isDebugEnabled() )
+    private Artifact getDependencyArtifact( Dependency dep )
+    {
+        org.eclipse.aether.artifact.Artifact artifact = dep.getArtifact();
+
+        Artifact mavenArtifact = RepositoryUtils.toArtifact( artifact );
+
+        mavenArtifact.setScope( dep.getScope() );
+        mavenArtifact.setOptional( dep.isOptional() );
+
+        return mavenArtifact;
+    }
+
+    private DependencyNode buildDependencyNode( DependencyNode parent, org.eclipse.aether.graph.DependencyNode node,
+                                                Artifact artifact, ArtifactFilter filter )
+    {
+        String premanagedVersion = DependencyManagerUtils.getPremanagedVersion( node );
+        String premanagedScope = DependencyManagerUtils.getPremanagedScope( node );
+
+        List<org.apache.maven.model.Exclusion> exclusions = null;
+        Boolean optional = null;
+        if ( node.getDependency() != null )
+        {
+            exclusions = new ArrayList<>( node.getDependency().getExclusions().size() );
+            for ( Exclusion exclusion : node.getDependency().getExclusions() )
             {
-                MavenProject project = buildingRequest.getProject();
-                
-                getLogger().debug( "building " + hint + " dependency graph for " + project.getId() + " with "
-                                + effectiveGraphBuilder.getClass().getSimpleName() );
+                org.apache.maven.model.Exclusion modelExclusion = new org.apache.maven.model.Exclusion();
+                modelExclusion.setGroupId( exclusion.getGroupId() );
+                modelExclusion.setArtifactId( exclusion.getArtifactId() );
+                exclusions.add( modelExclusion );
             }
+        }
 
-            return effectiveGraphBuilder.buildDependencyGraph( buildingRequest, filter );
-        }
-        catch ( ComponentLookupException e )
+        DefaultDependencyNode current =
+            new DefaultDependencyNode( parent, artifact, premanagedVersion, premanagedScope,
+                                       getVersionSelectedFromRange( node.getVersionConstraint() ),
+                                       optional, exclusions );
+
+        List<DependencyNode> nodes = new ArrayList<>( node.getChildren().size() );
+        for ( org.eclipse.aether.graph.DependencyNode child : node.getChildren() )
         {
-            throw new DependencyGraphBuilderException( e.getMessage(), e );
+            Artifact childArtifact = getDependencyArtifact( child.getDependency() );
+
+            if ( ( filter == null ) || filter.include( childArtifact ) )
+            {
+                nodes.add( buildDependencyNode( current, child, childArtifact, filter ) );
+            }
         }
+
+        current.setChildren( Collections.unmodifiableList( nodes ) );
+
+        return current;
     }
 
-    /**
-     * @return true if the current Maven version is Maven 3.1.
-     */
-    protected static boolean isMaven31()
+    private String getVersionSelectedFromRange( VersionConstraint constraint )
     {
-        try
+        if ( ( constraint == null ) || ( constraint.getVersion() != null ) )
         {
-            Class<?> repoSessionClass =  MavenSession.class.getMethod( "getRepositorySession" ).getReturnType();
-            
-            return "org.eclipse.aether.RepositorySystemSession".equals( repoSessionClass.getName() );
+            return null;
         }
-        catch ( NoSuchMethodException e )
-        {
-            throw new IllegalStateException( "Cannot determine return type of MavenSession.getRepositorySession" );
-        }
-    }
 
-    /**
-     * Injects the Plexus content.
-     *
-     * @param context   Plexus context to inject.
-     * @throws ContextException if the PlexusContainer could not be located.
-     */
-    @Override
-    public void contextualize( Context context )
-        throws ContextException
-    {
-        container = (PlexusContainer) context.get( PlexusConstants.PLEXUS_KEY );
+        return constraint.getRange().toString();
     }
 }

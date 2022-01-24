@@ -1,4 +1,4 @@
-package org.apache.maven.shared.dependency.graph.internal.maven31;
+package org.apache.maven.shared.dependency.graph.internal;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -31,7 +31,7 @@ import org.eclipse.aether.graph.Dependency;
  * @author Gabriel Belingueres
  * @since 3.1.0
  */
-public class Maven31DirectScopeDependencySelector
+public class DirectScopeDependencySelector
     implements DependencySelector
 {
 
@@ -39,12 +39,12 @@ public class Maven31DirectScopeDependencySelector
 
     private final int depth;
 
-    public Maven31DirectScopeDependencySelector( String scope )
+    public DirectScopeDependencySelector( String scope )
     {
         this( scope, 0 );
     }
 
-    private Maven31DirectScopeDependencySelector( String scope, int depth )
+    private DirectScopeDependencySelector( String scope, int depth )
     {
         if ( scope == null )
         {
@@ -82,7 +82,7 @@ public class Maven31DirectScopeDependencySelector
             return this;
         }
 
-        return new Maven31DirectScopeDependencySelector( scope, depth + 1 );
+        return new DirectScopeDependencySelector( scope, depth + 1 );
     }
 
     @Override
@@ -110,7 +110,7 @@ public class Maven31DirectScopeDependencySelector
         {
             return false;
         }
-        Maven31DirectScopeDependencySelector other = (Maven31DirectScopeDependencySelector) obj;
+        DirectScopeDependencySelector other = (DirectScopeDependencySelector) obj;
         if ( depth != other.depth )
         {
             return false;

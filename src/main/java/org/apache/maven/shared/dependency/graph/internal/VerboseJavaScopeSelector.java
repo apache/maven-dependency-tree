@@ -1,4 +1,4 @@
-package org.apache.maven.shared.dependency.graph.internal.maven30;
+package org.apache.maven.shared.dependency.graph.internal;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -19,13 +19,14 @@ package org.apache.maven.shared.dependency.graph.internal.maven30;
  * under the License.
  */
 
+import org.eclipse.aether.RepositoryException;
+import org.eclipse.aether.util.graph.transformer.ConflictResolver.ConflictContext;
+import org.eclipse.aether.util.graph.transformer.ConflictResolver.ScopeSelector;
+import org.eclipse.aether.util.graph.transformer.JavaScopeSelector;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
-import org.apache.maven.shared.dependency.graph.internal.maven30.ConflictResolver.ConflictContext;
-import org.apache.maven.shared.dependency.graph.internal.maven30.ConflictResolver.ScopeSelector;
-import org.sonatype.aether.RepositoryException;
 
 /**
  * A JavaScopeSelector that keeps track of reduced scopes
