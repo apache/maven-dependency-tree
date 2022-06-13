@@ -1,0 +1,2 @@
+org.apache.maven.its.dependency-tree:verbose:jar:1.0-SNAPSHOT
+\- jakarta.transaction:jakarta.transaction-api:jar:2.0.1:compile
