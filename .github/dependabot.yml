@@ -23,7 +23,7 @@ updates:
   ignore:
     - dependency-name: org.apache.maven:maven-core
       versions:
-        - ">3.0.5"
+        - ">3.2.5"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
