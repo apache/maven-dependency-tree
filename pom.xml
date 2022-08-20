@@ -57,7 +57,7 @@
   <properties>
     <javaVersion>8</javaVersion>
     <mavenVersion>3.2.5</mavenVersion>
-    <resolverVersion>1.0.0.v20140518</resolverVersion>
+    <resolverVersion>1.1.0</resolverVersion>
     <project.build.outputTimestamp>2022-05-14T10:50:43Z</project.build.outputTimestamp>
   </properties>
 
