@@ -73,7 +73,7 @@ import java.util.Objects;
  *   ConflictResolver.CONFIG_PROP_VERBOSE, true
  *   DependencyManagerUtils.CONFIG_PROP_VERBOSE, true
  * </pre>
- *
+ * <a href="https://maven.apache.org/resolver/configuration.html">Move Resolver configuration properties</a>.
  * </div>
  * @since 3.2.1
  */
