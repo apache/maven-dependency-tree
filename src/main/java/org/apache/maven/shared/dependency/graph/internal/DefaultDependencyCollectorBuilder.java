@@ -22,6 +22,7 @@ package org.apache.maven.shared.dependency.graph.internal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -35,6 +36,7 @@ import org.apache.maven.project.MavenProject;
 import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.shared.dependency.graph.DependencyCollectorBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyCollectorBuilderException;
+import org.apache.maven.shared.dependency.graph.DependencyCollectorRequest;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
@@ -43,19 +45,10 @@ import org.eclipse.aether.artifact.ArtifactTypeRegistry;
 import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.collection.CollectResult;
 import org.eclipse.aether.collection.DependencyCollectionException;
-import org.eclipse.aether.collection.DependencyGraphTransformer;
-import org.eclipse.aether.collection.DependencySelector;
 import org.eclipse.aether.graph.DependencyVisitor;
 import org.eclipse.aether.graph.Exclusion;
-import org.eclipse.aether.util.artifact.JavaScopes;
 import org.eclipse.aether.util.graph.manager.DependencyManagerUtils;
-import org.eclipse.aether.util.graph.selector.AndDependencySelector;
-import org.eclipse.aether.util.graph.selector.ExclusionDependencySelector;
-import org.eclipse.aether.util.graph.selector.OptionalDependencySelector;
 import org.eclipse.aether.util.graph.transformer.ConflictResolver;
-import org.eclipse.aether.util.graph.transformer.JavaScopeDeriver;
-import org.eclipse.aether.util.graph.transformer.NearestVersionSelector;
-import org.eclipse.aether.util.graph.transformer.SimpleOptionalitySelector;
 import org.eclipse.aether.util.graph.visitor.TreeDependencyVisitor;
 import org.eclipse.aether.version.VersionConstraint;
 import org.slf4j.Logger;
@@ -82,12 +75,13 @@ public class DefaultDependencyCollectorBuilder
     }
 
     @Override
-    public DependencyNode collectDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
+    public DependencyNode collectDependencyGraph( DependencyCollectorRequest dependencyCollectorRequest )
         throws DependencyCollectorBuilderException
     {
         DefaultRepositorySystemSession session = null;
         try
         {
+            ProjectBuildingRequest buildingRequest = dependencyCollectorRequest.getBuildingRequest();
             MavenProject project = buildingRequest.getProject();
 
             Artifact projectArtifact = project.getArtifact();
@@ -97,20 +91,14 @@ public class DefaultDependencyCollectorBuilder
 
             session = new DefaultRepositorySystemSession( repositorySession );
 
-            DependencyGraphTransformer transformer =
-                new ConflictResolver( new NearestVersionSelector(), new VerboseJavaScopeSelector(),
-                                      new SimpleOptionalitySelector(), new JavaScopeDeriver() );
-            session.setDependencyGraphTransformer( transformer );
+            session.setDependencyGraphTransformer( dependencyCollectorRequest.getDependencyGraphTransformer() );
 
-            DependencySelector depFilter =
-                new AndDependencySelector( new DirectScopeDependencySelector( JavaScopes.TEST ),
-                                           new DirectScopeDependencySelector( JavaScopes.PROVIDED ),
-                                           new OptionalDependencySelector(),
-                                           new ExclusionDependencySelector() );
-            session.setDependencySelector( depFilter );
+            session.setDependencySelector( dependencyCollectorRequest.getDependencySelector() );
 
-            session.setConfigProperty( ConflictResolver.CONFIG_PROP_VERBOSE, true );
-            session.setConfigProperty( DependencyManagerUtils.CONFIG_PROP_VERBOSE, true );
+            for ( Map.Entry<String, Object> entry : dependencyCollectorRequest.getConfigProperties().entrySet() )
+            {
+                session.setConfigProperty( entry.getKey(), entry.getValue() );
+            }
 
             org.eclipse.aether.artifact.Artifact aetherArtifact = RepositoryUtils.toArtifact( projectArtifact );
 
@@ -134,7 +122,7 @@ public class DefaultDependencyCollectorBuilder
                 logTree( rootNode );
             }
 
-            return buildDependencyNode( null, rootNode, projectArtifact, filter );
+            return buildDependencyNode( null, rootNode, projectArtifact, dependencyCollectorRequest.getFilter() );
         }
         catch ( DependencyCollectionException e )
         {

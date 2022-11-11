@@ -41,7 +41,22 @@ public interface DependencyCollectorBuilder
      * @return the raw dependency tree
      * @throws DependencyCollectorBuilderException if some of the dependencies could not be collected.
      */
-    DependencyNode collectDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
-        throws DependencyCollectorBuilderException;
+    default DependencyNode collectDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
+        throws DependencyCollectorBuilderException
+    {
+        return collectDependencyGraph( new DependencyCollectorRequest( buildingRequest, filter ) );
+    }
+
+    /**
+     * collect the project's raw dependency graph, with information to allow the API client to reason on its own about
+     * dependencies.
+     *
+     * @param dependencyCollectorRequest the request with different paramaters.
+     * @return the raw dependency tree
+     * @throws DependencyCollectorBuilderException if some of the dependencies could not be collected.
+     * @since 3.2.1
+     */
+    DependencyNode collectDependencyGraph( DependencyCollectorRequest dependencyCollectorRequest )
+            throws DependencyCollectorBuilderException;
 
 }
