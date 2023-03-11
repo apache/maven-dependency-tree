@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.internal;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.internal;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.graph.internal;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.internal;
 
 import org.eclipse.aether.collection.DependencyCollectionContext;
 import org.eclipse.aether.collection.DependencySelector;
@@ -26,29 +25,24 @@ import org.eclipse.aether.graph.Dependency;
 /**
  * A dependency selector that excludes dependencies of an specific Scope which occur beyond level one of the dependency
  * graph.
- * 
+ *
  * @see Dependency#getScope()
  * @author Gabriel Belingueres
  * @since 3.1.0
  */
-public class DirectScopeDependencySelector
-    implements DependencySelector
-{
+public class DirectScopeDependencySelector implements DependencySelector {
 
     private final String scope;
 
     private final int depth;
 
-    public DirectScopeDependencySelector( String scope )
-    {
-        this( scope, 0 );
+    public DirectScopeDependencySelector(String scope) {
+        this(scope, 0);
     }
 
-    private DirectScopeDependencySelector( String scope, int depth )
-    {
-        if ( scope == null )
-        {
-            throw new IllegalArgumentException( "scope is null!" );
+    private DirectScopeDependencySelector(String scope, int depth) {
+        if (scope == null) {
+            throw new IllegalArgumentException("scope is null!");
         }
         this.scope = scope;
         this.depth = depth;
@@ -56,77 +50,63 @@ public class DirectScopeDependencySelector
 
     /**
      * Decides whether the specified dependency should be included in the dependency graph.
-     * 
+     *
      * @param dependency The dependency to check, must not be {@code null}.
      * @return {@code false} if the dependency should be excluded from the children of the current node, {@code true}
      *         otherwise.
      */
     @Override
-    public boolean selectDependency( Dependency dependency )
-    {
-        return depth < 2 || !scope.equals( dependency.getScope() );
+    public boolean selectDependency(Dependency dependency) {
+        return depth < 2 || !scope.equals(dependency.getScope());
     }
 
     /**
      * Derives a dependency selector for the specified collection context. When calculating the child selector,
      * implementors are strongly advised to simply return the current instance if nothing changed to help save memory.
-     * 
+     *
      * @param context The dependency collection context, must not be {@code null}.
      * @return The dependency selector for the target node, must not be {@code null}.
      */
     @Override
-    public DependencySelector deriveChildSelector( DependencyCollectionContext context )
-    {
-        if ( depth >= 2 )
-        {
+    public DependencySelector deriveChildSelector(DependencyCollectionContext context) {
+        if (depth >= 2) {
             return this;
         }
 
-        return new DirectScopeDependencySelector( scope, depth + 1 );
+        return new DirectScopeDependencySelector(scope, depth + 1);
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + depth;
-        result = prime * result + ( ( scope == null ) ? 0 : scope.hashCode() );
+        result = prime * result + ((scope == null) ? 0 : scope.hashCode());
         return result;
     }
 
     @Override
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if ( obj == null )
-        {
+        if (obj == null) {
             return false;
         }
-        if ( getClass() != obj.getClass() )
-        {
+        if (getClass() != obj.getClass()) {
             return false;
         }
         DirectScopeDependencySelector other = (DirectScopeDependencySelector) obj;
-        if ( depth != other.depth )
-        {
+        if (depth != other.depth) {
             return false;
         }
-        if ( scope == null )
-        {
-            if ( other.scope != null )
-            {
+        if (scope == null) {
+            if (other.scope != null) {
                 return false;
             }
-        }
-        else if ( !scope.equals( other.scope ) )
-        {
+        } else if (!scope.equals(other.scope)) {
             return false;
         }
         return true;
     }
-
 }

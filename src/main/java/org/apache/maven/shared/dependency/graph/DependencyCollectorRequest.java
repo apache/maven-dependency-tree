@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,11 @@ package org.apache.maven.shared.dependency.graph;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.project.ProjectBuildingRequest;
@@ -34,10 +37,6 @@ import org.eclipse.aether.util.graph.transformer.ConflictResolver;
 import org.eclipse.aether.util.graph.transformer.JavaScopeDeriver;
 import org.eclipse.aether.util.graph.transformer.NearestVersionSelector;
 import org.eclipse.aether.util.graph.transformer.SimpleOptionalitySelector;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * <div>
@@ -77,8 +76,7 @@ import java.util.Objects;
  * </div>
  * @since 3.2.1
  */
-public class DependencyCollectorRequest
-{
+public class DependencyCollectorRequest {
 
     private final ProjectBuildingRequest buildingRequest;
 
@@ -87,76 +85,65 @@ public class DependencyCollectorRequest
     private Map<String, Object> configProperties = new HashMap<>();
 
     private DependencySelector dependencySelector = new AndDependencySelector(
-            new DirectScopeDependencySelector( JavaScopes.TEST ),
-            new DirectScopeDependencySelector( JavaScopes.PROVIDED ),
+            new DirectScopeDependencySelector(JavaScopes.TEST),
+            new DirectScopeDependencySelector(JavaScopes.PROVIDED),
             new OptionalDependencySelector(),
-            new ExclusionDependencySelector() );
+            new ExclusionDependencySelector());
 
     private DependencyGraphTransformer dependencyGraphTransformer = new ConflictResolver(
             new NearestVersionSelector(),
             new VerboseJavaScopeSelector(),
             new SimpleOptionalitySelector(),
-            new JavaScopeDeriver() );
+            new JavaScopeDeriver());
 
-    public DependencyCollectorRequest( ProjectBuildingRequest buildingRequest )
-    {
-        this( buildingRequest, null );
+    public DependencyCollectorRequest(ProjectBuildingRequest buildingRequest) {
+        this(buildingRequest, null);
     }
 
-    public DependencyCollectorRequest( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
-    {
-        Objects.requireNonNull( buildingRequest, "ProjectBuildingRequest cannot be null" );
+    public DependencyCollectorRequest(ProjectBuildingRequest buildingRequest, ArtifactFilter filter) {
+        Objects.requireNonNull(buildingRequest, "ProjectBuildingRequest cannot be null");
         this.buildingRequest = buildingRequest;
         this.filter = filter;
-        configProperties.put( ConflictResolver.CONFIG_PROP_VERBOSE, true );
-        configProperties.put( DependencyManagerUtils.CONFIG_PROP_VERBOSE, true );
+        configProperties.put(ConflictResolver.CONFIG_PROP_VERBOSE, true);
+        configProperties.put(DependencyManagerUtils.CONFIG_PROP_VERBOSE, true);
     }
 
-    public ProjectBuildingRequest getBuildingRequest()
-    {
+    public ProjectBuildingRequest getBuildingRequest() {
         return buildingRequest;
     }
 
-    public ArtifactFilter getFilter()
-    {
+    public ArtifactFilter getFilter() {
         return filter;
     }
 
-    public DependencySelector getDependencySelector()
-    {
+    public DependencySelector getDependencySelector() {
         return dependencySelector;
     }
 
-    public DependencyCollectorRequest dependencySelector( DependencySelector dependencySelector )
-    {
+    public DependencyCollectorRequest dependencySelector(DependencySelector dependencySelector) {
         this.dependencySelector = dependencySelector;
         return this;
     }
 
-    public DependencyGraphTransformer getDependencyGraphTransformer()
-    {
+    public DependencyGraphTransformer getDependencyGraphTransformer() {
         return dependencyGraphTransformer;
     }
 
     public DependencyCollectorRequest dependencyGraphTransformer(
-            DependencyGraphTransformer dependencyGraphTransformer )
-    {
+            DependencyGraphTransformer dependencyGraphTransformer) {
         this.dependencyGraphTransformer = dependencyGraphTransformer;
         return this;
     }
 
-    public Map<String, Object> getConfigProperties()
-    {
+    public Map<String, Object> getConfigProperties() {
         return this.configProperties;
     }
 
-    public void addConfigProperty( String key, Object value )
-    {
-        this.configProperties.put( key, value );
+    public void addConfigProperty(String key, Object value) {
+        this.configProperties.put(key, value);
     }
 
-    public void removeConfigProperty( String key )
-    {
-        this.configProperties.remove( key );
+    public void removeConfigProperty(String key) {
+        this.configProperties.remove(key);
     }
 }
