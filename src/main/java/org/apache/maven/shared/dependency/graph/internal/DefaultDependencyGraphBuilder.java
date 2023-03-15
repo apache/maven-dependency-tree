@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.internal;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.internal;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,15 +16,14 @@ package org.apache.maven.shared.dependency.graph.internal;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.internal;
 
-import static org.eclipse.aether.util.graph.manager.DependencyManagerUtils.NODE_DATA_PREMANAGED_VERSION;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
@@ -49,6 +46,8 @@ import org.eclipse.aether.graph.Exclusion;
 import org.eclipse.aether.util.graph.manager.DependencyManagerUtils;
 import org.eclipse.aether.version.VersionConstraint;
 
+import static org.eclipse.aether.util.graph.manager.DependencyManagerUtils.NODE_DATA_PREMANAGED_VERSION;
+
 /**
  * Wrapper around Eclipse Aether dependency resolver, used in Maven 3.1.
  *
@@ -57,14 +56,11 @@ import org.eclipse.aether.version.VersionConstraint;
  * @since 2.1
  */
 @Named
-public class DefaultDependencyGraphBuilder
-    implements DependencyGraphBuilder
-{
+public class DefaultDependencyGraphBuilder implements DependencyGraphBuilder {
     private final ProjectDependenciesResolver resolver;
 
     @Inject
-    public DefaultDependencyGraphBuilder( ProjectDependenciesResolver resolver )
-    {
+    public DefaultDependencyGraphBuilder(ProjectDependenciesResolver resolver) {
         this.resolver = resolver;
     }
 
@@ -77,105 +73,98 @@ public class DefaultDependencyGraphBuilder
      * @throws DependencyGraphBuilderException if some of the dependencies could not be resolved.
      */
     @Override
-    public DependencyNode buildDependencyGraph( ProjectBuildingRequest buildingRequest, ArtifactFilter filter )
-        throws DependencyGraphBuilderException
-    {
+    public DependencyNode buildDependencyGraph(ProjectBuildingRequest buildingRequest, ArtifactFilter filter)
+            throws DependencyGraphBuilderException {
         MavenProject project = buildingRequest.getProject();
 
         RepositorySystemSession session = buildingRequest.getRepositorySession();
-        
-        if ( Boolean.TRUE != session.getConfigProperties().get( NODE_DATA_PREMANAGED_VERSION ) )
-        {
-            DefaultRepositorySystemSession newSession = new DefaultRepositorySystemSession( session );
-            newSession.setConfigProperty( NODE_DATA_PREMANAGED_VERSION, true );
+
+        if (Boolean.TRUE != session.getConfigProperties().get(NODE_DATA_PREMANAGED_VERSION)) {
+            DefaultRepositorySystemSession newSession = new DefaultRepositorySystemSession(session);
+            newSession.setConfigProperty(NODE_DATA_PREMANAGED_VERSION, true);
             session = newSession;
-        }         
+        }
 
         final DependencyResolutionRequest request = new DefaultDependencyResolutionRequest();
-        request.setMavenProject( project );
-        request.setRepositorySession( session );
+        request.setMavenProject(project);
+        request.setRepositorySession(session);
         // only download the poms, not the artifacts
-        DependencyFilter collectFilter = ( node, parents ) -> false;
-        request.setResolutionFilter( collectFilter );
+        DependencyFilter collectFilter = (node, parents) -> false;
+        request.setResolutionFilter(collectFilter);
 
-        final DependencyResolutionResult result = resolveDependencies( request );
+        final DependencyResolutionResult result = resolveDependencies(request);
 
         org.eclipse.aether.graph.DependencyNode graph = result.getDependencyGraph();
 
-        return buildDependencyNode( null, graph, project.getArtifact(), filter );
+        return buildDependencyNode(null, graph, project.getArtifact(), filter);
     }
 
-    private DependencyResolutionResult resolveDependencies( DependencyResolutionRequest request )
-        throws DependencyGraphBuilderException
-    {
-        try
-        {
-            return resolver.resolve( request );
-        }
-        catch ( DependencyResolutionException e )
-        {
-            throw new DependencyGraphBuilderException( "Could not resolve following dependencies: "
-                + e.getResult().getUnresolvedDependencies(), e );
+    private DependencyResolutionResult resolveDependencies(DependencyResolutionRequest request)
+            throws DependencyGraphBuilderException {
+        try {
+            return resolver.resolve(request);
+        } catch (DependencyResolutionException e) {
+            throw new DependencyGraphBuilderException(
+                    "Could not resolve following dependencies: " + e.getResult().getUnresolvedDependencies(), e);
         }
     }
 
-    private Artifact getDependencyArtifact( Dependency dep )
-    {
+    private Artifact getDependencyArtifact(Dependency dep) {
         org.eclipse.aether.artifact.Artifact artifact = dep.getArtifact();
 
-        Artifact mavenArtifact = RepositoryUtils.toArtifact( artifact );
+        Artifact mavenArtifact = RepositoryUtils.toArtifact(artifact);
 
-        mavenArtifact.setScope( dep.getScope() );
-        mavenArtifact.setOptional( dep.isOptional() );
+        mavenArtifact.setScope(dep.getScope());
+        mavenArtifact.setOptional(dep.isOptional());
 
         return mavenArtifact;
     }
 
-    private DependencyNode buildDependencyNode( DependencyNode parent, org.eclipse.aether.graph.DependencyNode node,
-                                                Artifact artifact, ArtifactFilter filter )
-    {
-        String premanagedVersion = DependencyManagerUtils.getPremanagedVersion( node );
-        String premanagedScope = DependencyManagerUtils.getPremanagedScope( node );
+    private DependencyNode buildDependencyNode(
+            DependencyNode parent,
+            org.eclipse.aether.graph.DependencyNode node,
+            Artifact artifact,
+            ArtifactFilter filter) {
+        String premanagedVersion = DependencyManagerUtils.getPremanagedVersion(node);
+        String premanagedScope = DependencyManagerUtils.getPremanagedScope(node);
 
         List<org.apache.maven.model.Exclusion> exclusions = null;
         Boolean optional = null;
-        if ( node.getDependency() != null )
-        {
-            exclusions = new ArrayList<>( node.getDependency().getExclusions().size() );
-            for ( Exclusion exclusion : node.getDependency().getExclusions() )
-            {
+        if (node.getDependency() != null) {
+            exclusions = new ArrayList<>(node.getDependency().getExclusions().size());
+            for (Exclusion exclusion : node.getDependency().getExclusions()) {
                 org.apache.maven.model.Exclusion modelExclusion = new org.apache.maven.model.Exclusion();
-                modelExclusion.setGroupId( exclusion.getGroupId() );
-                modelExclusion.setArtifactId( exclusion.getArtifactId() );
-                exclusions.add( modelExclusion );
+                modelExclusion.setGroupId(exclusion.getGroupId());
+                modelExclusion.setArtifactId(exclusion.getArtifactId());
+                exclusions.add(modelExclusion);
             }
         }
 
-        DefaultDependencyNode current =
-            new DefaultDependencyNode( parent, artifact, premanagedVersion, premanagedScope,
-                                       getVersionSelectedFromRange( node.getVersionConstraint() ),
-                                       optional, exclusions );
+        DefaultDependencyNode current = new DefaultDependencyNode(
+                parent,
+                artifact,
+                premanagedVersion,
+                premanagedScope,
+                getVersionSelectedFromRange(node.getVersionConstraint()),
+                optional,
+                exclusions);
 
-        List<DependencyNode> nodes = new ArrayList<>( node.getChildren().size() );
-        for ( org.eclipse.aether.graph.DependencyNode child : node.getChildren() )
-        {
-            Artifact childArtifact = getDependencyArtifact( child.getDependency() );
+        List<DependencyNode> nodes = new ArrayList<>(node.getChildren().size());
+        for (org.eclipse.aether.graph.DependencyNode child : node.getChildren()) {
+            Artifact childArtifact = getDependencyArtifact(child.getDependency());
 
-            if ( ( filter == null ) || filter.include( childArtifact ) )
-            {
-                nodes.add( buildDependencyNode( current, child, childArtifact, filter ) );
+            if ((filter == null) || filter.include(childArtifact)) {
+                nodes.add(buildDependencyNode(current, child, childArtifact, filter));
             }
         }
 
-        current.setChildren( Collections.unmodifiableList( nodes ) );
+        current.setChildren(Collections.unmodifiableList(nodes));
 
         return current;
     }
 
-    private String getVersionSelectedFromRange( VersionConstraint constraint )
-    {
-        if ( ( constraint == null ) || ( constraint.getVersion() != null ) )
-        {
+    private String getVersionSelectedFromRange(VersionConstraint constraint) {
+        if ((constraint == null) || (constraint.getVersion() != null)) {
             return null;
         }
 

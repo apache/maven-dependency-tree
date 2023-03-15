@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.internal;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.internal;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,56 +16,48 @@ package org.apache.maven.shared.dependency.graph.internal;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.internal;
 
 /**
- * Excplicit subset of Aethers DependencyNode.getData()
- * 
- * @author Robert Scholte
+ * Explicit subset of Aether's DependencyNode.getData().
  *
+ * @author Robert Scholte
  */
-public class ConflictData
-{
+public class ConflictData {
     private String winnerVersion;
 
     private String originalScope;
-    
+
     private String ignoredScope;
-    
+
     private Boolean originaOptionality;
-    
-    public ConflictData( String winnerVersion, String ignoredScope )
-    {
+
+    public ConflictData(String winnerVersion, String ignoredScope) {
         this.winnerVersion = winnerVersion;
         this.ignoredScope = ignoredScope;
     }
-    
-    public String getWinnerVersion()
-    {
+
+    public String getWinnerVersion() {
         return winnerVersion;
     }
-    
-    public String getOriginalScope()
-    {
+
+    public String getOriginalScope() {
         return originalScope;
     }
 
-    public void setOriginalScope( String originalScope )
-    {
+    public void setOriginalScope(String originalScope) {
         this.originalScope = originalScope;
     }
 
-    public Boolean getOriginaOptionality()
-    {
+    public Boolean getOriginaOptionality() {
         return originaOptionality;
     }
 
-    public void setOriginaOptionality( Boolean originaOptionality )
-    {
+    public void setOriginaOptionality(Boolean originaOptionality) {
         this.originaOptionality = originaOptionality;
     }
 
-    public String getIgnoredScope()
-    {
+    public String getIgnoredScope() {
         return ignoredScope;
     }
 }

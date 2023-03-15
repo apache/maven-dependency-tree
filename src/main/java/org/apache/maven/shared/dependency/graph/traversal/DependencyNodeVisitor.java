@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.traversal;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.traversal;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,33 +16,33 @@ package org.apache.maven.shared.dependency.graph.traversal;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.traversal;
 
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 
 /**
  * Defines a hierarchical visitor for processing dependency node trees.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  * @since 1.1
  */
-public interface DependencyNodeVisitor
-{
+public interface DependencyNodeVisitor {
     /**
      * Starts the visit to the specified dependency node.
-     * 
+     *
      * @param node the dependency node to visit
      * @return <code>true</code> to visit the specified dependency node's children, <code>false</code> to skip the
      *         specified dependency node's children and proceed to its next sibling
      */
-    boolean visit( DependencyNode node );
+    boolean visit(DependencyNode node);
 
     /**
      * Ends the visit to to the specified dependency node.
-     * 
+     *
      * @param node the dependency node to visit
      * @return <code>true</code> to visit the specified dependency node's next sibling, <code>false</code> to skip the
      *         specified dependency node's next siblings and proceed to its parent
      */
-    boolean endVisit( DependencyNode node );
+    boolean endVisit(DependencyNode node);
 }

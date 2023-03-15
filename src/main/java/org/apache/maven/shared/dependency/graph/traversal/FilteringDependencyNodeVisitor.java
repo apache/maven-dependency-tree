@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.traversal;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.traversal;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,20 +16,19 @@ package org.apache.maven.shared.dependency.graph.traversal;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.traversal;
 
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.filter.DependencyNodeFilter;
 
 /**
  * A dependency node visitor that filters nodes and delegates to another visitor.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  * @since 1.1
  */
-public class FilteringDependencyNodeVisitor
-    implements DependencyNodeVisitor
-{
+public class FilteringDependencyNodeVisitor implements DependencyNodeVisitor {
     // fields -----------------------------------------------------------------
 
     /**
@@ -49,12 +46,11 @@ public class FilteringDependencyNodeVisitor
     /**
      * Creates a dependency node visitor that delegates nodes that are accepted by the specified filter to the specified
      * visitor.
-     * 
+     *
      * @param visitor the dependency node visitor to delegate to
      * @param filter the dependency node filter to apply before delegation
      */
-    public FilteringDependencyNodeVisitor( DependencyNodeVisitor visitor, DependencyNodeFilter filter )
-    {
+    public FilteringDependencyNodeVisitor(DependencyNodeVisitor visitor, DependencyNodeFilter filter) {
         this.visitor = visitor;
         this.filter = filter;
     }
@@ -65,16 +61,12 @@ public class FilteringDependencyNodeVisitor
      * {@inheritDoc}
      */
     @Override
-    public boolean visit( DependencyNode node )
-    {
+    public boolean visit(DependencyNode node) {
         boolean visit;
 
-        if ( filter.accept( node ) )
-        {
-            visit = visitor.visit( node );
-        }
-        else
-        {
+        if (filter.accept(node)) {
+            visit = visitor.visit(node);
+        } else {
             visit = true;
         }
 
@@ -85,16 +77,12 @@ public class FilteringDependencyNodeVisitor
      * {@inheritDoc}
      */
     @Override
-    public boolean endVisit( DependencyNode node )
-    {
+    public boolean endVisit(DependencyNode node) {
         boolean visit;
 
-        if ( filter.accept( node ) )
-        {
-            visit = visitor.endVisit( node );
-        }
-        else
-        {
+        if (filter.accept(node)) {
+            visit = visitor.endVisit(node);
+        } else {
             visit = true;
         }
 
@@ -105,21 +93,19 @@ public class FilteringDependencyNodeVisitor
 
     /**
      * Gets the dependency node visitor that this visitor delegates to.
-     * 
+     *
      * @return the dependency node visitor
      */
-    public DependencyNodeVisitor getDependencyNodeVisitor()
-    {
+    public DependencyNodeVisitor getDependencyNodeVisitor() {
         return visitor;
     }
 
     /**
      * Gets the dependency node filter that this visitor applies before delegation.
-     * 
+     *
      * @return the dependency node filter
      */
-    public DependencyNodeFilter getDependencyNodeFilter()
-    {
+    public DependencyNodeFilter getDependencyNodeFilter() {
         return filter;
     }
 }

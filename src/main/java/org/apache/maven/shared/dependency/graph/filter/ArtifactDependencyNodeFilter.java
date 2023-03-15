@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.filter;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.filter;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.graph.filter;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.filter;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
@@ -25,14 +24,12 @@ import org.apache.maven.shared.dependency.graph.DependencyNode;
 
 /**
  * A dependency node filter that delegates to an artifact filter.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  * @since 1.1
  */
-public class ArtifactDependencyNodeFilter
-    implements DependencyNodeFilter
-{
+public class ArtifactDependencyNodeFilter implements DependencyNodeFilter {
     // fields -----------------------------------------------------------------
 
     /**
@@ -44,11 +41,10 @@ public class ArtifactDependencyNodeFilter
 
     /**
      * Creates a dependency node filter that delegates to the specified artifact filter.
-     * 
+     *
      * @param filter the artifact filter to delegate to
      */
-    public ArtifactDependencyNodeFilter( ArtifactFilter filter )
-    {
+    public ArtifactDependencyNodeFilter(ArtifactFilter filter) {
         this.filter = filter;
     }
 
@@ -58,22 +54,20 @@ public class ArtifactDependencyNodeFilter
      * {@inheritDoc}
      */
     @Override
-    public boolean accept( DependencyNode node )
-    {
+    public boolean accept(DependencyNode node) {
         Artifact artifact = node.getArtifact();
 
-        return filter.include( artifact );
+        return filter.include(artifact);
     }
 
     // public methods ---------------------------------------------------------
 
     /**
      * Gets the artifact filter this dependency node filter delegates to.
-     * 
+     *
      * @return the artifact filter this dependency node filter delegates to
      */
-    public ArtifactFilter getArtifactFilter()
-    {
+    public ArtifactFilter getArtifactFilter() {
         return filter;
     }
 }

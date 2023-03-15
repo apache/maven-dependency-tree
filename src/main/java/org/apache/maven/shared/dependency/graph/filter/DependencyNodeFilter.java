@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.filter;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.filter;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,23 +16,23 @@ package org.apache.maven.shared.dependency.graph.filter;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.filter;
 
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 
 /**
  * Defines a filter for dependency nodes.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  * @since 1.1
  */
-public interface DependencyNodeFilter
-{
+public interface DependencyNodeFilter {
     /**
      * Gets whether this filter accepts the specified dependency node.
-     * 
+     *
      * @param node the dependency node to check
      * @return <code>true</code> if this filter accepts the specified dependency node
      */
-    boolean accept( DependencyNode node );
+    boolean accept(DependencyNode node);
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.traversal;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.traversal;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.graph.traversal;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.traversal;
 
 import java.util.ArrayList;
 import java.util.Stack;
@@ -28,12 +27,10 @@ import org.apache.maven.shared.dependency.graph.internal.DefaultDependencyNode;
 /**
  * A dependency node visitor that clones visited nodes into a new dependency tree. This can be used in conjunction with
  * a dependency node filter to construct subtrees.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-public class BuildingDependencyNodeVisitor
-    implements DependencyNodeVisitor
-{
+public class BuildingDependencyNodeVisitor implements DependencyNodeVisitor {
     // fields -----------------------------------------------------------------
 
     /**
@@ -56,20 +53,18 @@ public class BuildingDependencyNodeVisitor
     /**
      * Creates a dependency node visitor that clones visited nodes into a new dependency tree.
      */
-    public BuildingDependencyNodeVisitor()
-    {
-        this( null );
+    public BuildingDependencyNodeVisitor() {
+        this(null);
     }
 
     /**
      * Creates a dependency node visitor that clones visited nodes into a new dependency tree, and then applies the
      * specified dependency node visitor on the resultant dependency tree.
-     * 
+     *
      * @param visitor the dependency node visitor to apply on the resultant dependency tree, or <code>null</code> for
      *            none
      */
-    public BuildingDependencyNodeVisitor( DependencyNodeVisitor visitor )
-    {
+    public BuildingDependencyNodeVisitor(DependencyNodeVisitor visitor) {
         this.visitor = visitor;
 
         parentNodes = new Stack<>();
@@ -81,27 +76,26 @@ public class BuildingDependencyNodeVisitor
      * {@inheritDoc}
      */
     @Override
-    public boolean visit( DependencyNode node )
-    {
+    public boolean visit(DependencyNode node) {
         // clone the node
-        DefaultDependencyNode newNode =
-            new DefaultDependencyNode( parentNodes.isEmpty() ? null : parentNodes.peek(), node.getArtifact(),
-                                       node.getPremanagedVersion(), node.getPremanagedScope(),
-                                       node.getVersionConstraint(),
-                                       node.getOptional(), node.getExclusions() );
-        newNode.setChildren( new ArrayList<>() );
+        DefaultDependencyNode newNode = new DefaultDependencyNode(
+                parentNodes.isEmpty() ? null : parentNodes.peek(),
+                node.getArtifact(),
+                node.getPremanagedVersion(),
+                node.getPremanagedScope(),
+                node.getVersionConstraint(),
+                node.getOptional(),
+                node.getExclusions());
+        newNode.setChildren(new ArrayList<>());
 
-        if ( parentNodes.empty() )
-        {
+        if (parentNodes.empty()) {
             rootNode = newNode;
-        }
-        else
-        {
+        } else {
             DependencyNode parentNode = parentNodes.peek();
-            parentNode.getChildren().add( newNode );
+            parentNode.getChildren().add(newNode);
         }
 
-        parentNodes.push( newNode );
+        parentNodes.push(newNode);
 
         return true;
     }
@@ -110,14 +104,12 @@ public class BuildingDependencyNodeVisitor
      * {@inheritDoc}
      */
     @Override
-    public boolean endVisit( DependencyNode node )
-    {
+    public boolean endVisit(DependencyNode node) {
         parentNodes.pop();
 
         // apply the visitor to the resultant tree on the last visit
-        if ( parentNodes.empty() && visitor != null )
-        {
-            rootNode.accept( visitor );
+        if (parentNodes.empty() && visitor != null) {
+            rootNode.accept(visitor);
         }
 
         return true;
@@ -127,21 +119,19 @@ public class BuildingDependencyNodeVisitor
 
     /**
      * Gets the dependency node visitor that this visitor applies on the resultant dependency tree.
-     * 
+     *
      * @return the dependency node visitor, or <code>null</code> for none
      */
-    public DependencyNodeVisitor getDependencyNodeVisitor()
-    {
+    public DependencyNodeVisitor getDependencyNodeVisitor() {
         return visitor;
     }
 
     /**
      * Gets the root node of the resultant dependency tree constructed by this visitor.
-     * 
+     *
      * @return the root node, or <code>null</code> if the source tree has not yet been visited
      */
-    public DependencyNode getDependencyTree()
-    {
+    public DependencyNode getDependencyTree() {
         return rootNode;
     }
 }

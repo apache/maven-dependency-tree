@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.traversal;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.traversal;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.graph.traversal;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.traversal;
 
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -27,19 +26,16 @@ import org.apache.maven.shared.dependency.graph.DependencyNode;
 
 /**
  * A dependency node visitor that serializes visited nodes to a writer.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  */
-public class SerializingDependencyNodeVisitor
-    implements DependencyNodeVisitor
-{
+public class SerializingDependencyNodeVisitor implements DependencyNodeVisitor {
     // classes ----------------------------------------------------------------
 
     /**
      * Provides tokens to use when serializing the dependency graph.
      */
-    public static class GraphTokens
-    {
+    public static class GraphTokens {
         private final String nodeIndent;
 
         private final String lastNodeIndent;
@@ -48,21 +44,18 @@ public class SerializingDependencyNodeVisitor
 
         private final String lastFillIndent;
 
-        public GraphTokens( String nodeIndent, String lastNodeIndent, String fillIndent, String lastFillIndent )
-        {
+        public GraphTokens(String nodeIndent, String lastNodeIndent, String fillIndent, String lastFillIndent) {
             this.nodeIndent = nodeIndent;
             this.lastNodeIndent = lastNodeIndent;
             this.fillIndent = fillIndent;
             this.lastFillIndent = lastFillIndent;
         }
 
-        public String getNodeIndent( boolean last )
-        {
+        public String getNodeIndent(boolean last) {
             return last ? lastNodeIndent : nodeIndent;
         }
 
-        public String getFillIndent( boolean last )
-        {
+        public String getFillIndent(boolean last) {
             return last ? lastFillIndent : fillIndent;
         }
     }
@@ -72,18 +65,18 @@ public class SerializingDependencyNodeVisitor
     /**
      * Whitespace tokens to use when outputing the dependency graph.
      */
-    public static final GraphTokens WHITESPACE_TOKENS = new GraphTokens( "   ", "   ", "   ", "   " );
+    public static final GraphTokens WHITESPACE_TOKENS = new GraphTokens("   ", "   ", "   ", "   ");
 
     /**
      * The standard ASCII tokens to use when outputing the dependency graph.
      */
-    public static final GraphTokens STANDARD_TOKENS = new GraphTokens( "+- ", "\\- ", "|  ", "   " );
+    public static final GraphTokens STANDARD_TOKENS = new GraphTokens("+- ", "\\- ", "|  ", "   ");
 
     /**
      * The extended ASCII tokens to use when outputing the dependency graph.
      */
-    public static final GraphTokens EXTENDED_TOKENS = new GraphTokens( "\u251C\u2500 ", "\u2514\u2500 ", "\u2502  ",
-                                                                       "   " );
+    public static final GraphTokens EXTENDED_TOKENS =
+            new GraphTokens("\u251C\u2500 ", "\u2514\u2500 ", "\u2502  ", "   ");
 
     // fields -----------------------------------------------------------------
 
@@ -106,30 +99,25 @@ public class SerializingDependencyNodeVisitor
 
     /**
      * Creates a dependency node visitor that serializes visited nodes to the specified writer using whitespace tokens.
-     * 
+     *
      * @param writer the writer to serialize to
      */
-    public SerializingDependencyNodeVisitor( Writer writer )
-    {
-        this( writer, WHITESPACE_TOKENS );
+    public SerializingDependencyNodeVisitor(Writer writer) {
+        this(writer, WHITESPACE_TOKENS);
     }
 
     /**
      * Creates a dependency node visitor that serializes visited nodes to the specified writer using the specified
      * tokens.
-     * 
+     *
      * @param writer the writer to serialize to
      * @param tokens the tokens to use when serializing the dependency graph
      */
-    public SerializingDependencyNodeVisitor( Writer writer, GraphTokens tokens )
-    {
-        if ( writer instanceof PrintWriter )
-        {
+    public SerializingDependencyNodeVisitor(Writer writer, GraphTokens tokens) {
+        if (writer instanceof PrintWriter) {
             this.writer = (PrintWriter) writer;
-        }
-        else
-        {
-            this.writer = new PrintWriter( writer, true );
+        } else {
+            this.writer = new PrintWriter(writer, true);
         }
 
         this.tokens = tokens;
@@ -143,11 +131,10 @@ public class SerializingDependencyNodeVisitor
      * {@inheritDoc}
      */
     @Override
-    public boolean visit( DependencyNode node )
-    {
-        indent( node );
+    public boolean visit(DependencyNode node) {
+        indent(node);
 
-        writer.println( node.toNodeString() );
+        writer.println(node.toNodeString());
 
         depth++;
 
@@ -158,8 +145,7 @@ public class SerializingDependencyNodeVisitor
      * {@inheritDoc}
      */
     @Override
-    public boolean endVisit( DependencyNode node )
-    {
+    public boolean endVisit(DependencyNode node) {
         depth--;
 
         return true;
@@ -169,45 +155,38 @@ public class SerializingDependencyNodeVisitor
 
     /**
      * Writes the necessary tokens to indent the specified dependency node to this visitor's writer.
-     * 
+     *
      * @param node the dependency node to indent
      */
-    private void indent( DependencyNode node )
-    {
-        for ( int i = 1; i < depth; i++ )
-        {
-            writer.write( tokens.getFillIndent( isLast( node, i ) ) );
+    private void indent(DependencyNode node) {
+        for (int i = 1; i < depth; i++) {
+            writer.write(tokens.getFillIndent(isLast(node, i)));
         }
 
-        if ( depth > 0 )
-        {
-            writer.write( tokens.getNodeIndent( isLast( node ) ) );
+        if (depth > 0) {
+            writer.write(tokens.getNodeIndent(isLast(node)));
         }
     }
 
     /**
      * Gets whether the specified dependency node is the last of its siblings.
-     * 
+     *
      * @param node the dependency node to check
      * @return <code>true</code> if the specified dependency node is the last of its last siblings
      */
-    private boolean isLast( DependencyNode node )
-    {
+    private boolean isLast(DependencyNode node) {
         // TODO: remove node argument and calculate from visitor calls only
 
         DependencyNode parent = node.getParent();
 
         boolean last;
 
-        if ( parent == null )
-        {
+        if (parent == null) {
             last = true;
-        }
-        else
-        {
+        } else {
             List<DependencyNode> siblings = parent.getChildren();
 
-            last = ( siblings.indexOf( node ) == siblings.size() - 1 );
+            last = (siblings.indexOf(node) == siblings.size() - 1);
         }
 
         return last;
@@ -215,22 +194,20 @@ public class SerializingDependencyNodeVisitor
 
     /**
      * Gets whether the specified dependency node ancestor is the last of its siblings.
-     * 
+     *
      * @param node the dependency node whose ancestor to check
      * @param ancestorDepth the depth of the ancestor of the specified dependency node to check
      * @return <code>true</code> if the specified dependency node ancestor is the last of its siblings
      */
-    private boolean isLast( DependencyNode node, int ancestorDepth )
-    {
+    private boolean isLast(DependencyNode node, int ancestorDepth) {
         // TODO: remove node argument and calculate from visitor calls only
 
         int distance = depth - ancestorDepth;
 
-        while ( distance-- > 0 )
-        {
+        while (distance-- > 0) {
             node = node.getParent();
         }
 
-        return isLast( node );
+        return isLast(node);
     }
 }

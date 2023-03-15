@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.filter;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.filter;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.graph.filter;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.filter;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,14 +26,12 @@ import org.apache.maven.shared.dependency.graph.DependencyNode;
 
 /**
  * A dependency node filter that logically ANDs together a number of other dependency node filters.
- * 
+ *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
  * @since 1.1
  */
-public class AndDependencyNodeFilter
-    implements DependencyNodeFilter
-{
+public class AndDependencyNodeFilter implements DependencyNodeFilter {
     // fields -----------------------------------------------------------------
 
     /**
@@ -46,23 +43,21 @@ public class AndDependencyNodeFilter
 
     /**
      * Creates a dependency node filter that logically ANDs together the two specified dependency node filters.
-     * 
+     *
      * @param filter1 the first dependency node filter to logically AND together
      * @param filter2 the second dependency node filter to logically AND together
      */
-    public AndDependencyNodeFilter( DependencyNodeFilter filter1, DependencyNodeFilter filter2 )
-    {
-        this( Arrays.asList( filter1, filter2 ) );
+    public AndDependencyNodeFilter(DependencyNodeFilter filter1, DependencyNodeFilter filter2) {
+        this(Arrays.asList(filter1, filter2));
     }
 
     /**
      * Creates a dependency node filter that logically ANDs together the specified dependency node filters.
-     * 
+     *
      * @param filters the list of dependency node filters to logically AND together
      */
-    public AndDependencyNodeFilter( List<DependencyNodeFilter> filters )
-    {
-        this.filters = Collections.unmodifiableList( filters );
+    public AndDependencyNodeFilter(List<DependencyNodeFilter> filters) {
+        this.filters = Collections.unmodifiableList(filters);
     }
 
     // DependencyNodeFilter methods -------------------------------------------
@@ -71,12 +66,9 @@ public class AndDependencyNodeFilter
      * {@inheritDoc}
      */
     @Override
-    public boolean accept( DependencyNode node )
-    {
-        for ( DependencyNodeFilter filter : filters )
-        {
-            if ( !filter.accept( node ) )
-            {
+    public boolean accept(DependencyNode node) {
+        for (DependencyNodeFilter filter : filters) {
+            if (!filter.accept(node)) {
                 return false;
             }
         }
@@ -88,11 +80,10 @@ public class AndDependencyNodeFilter
 
     /**
      * Gets the list of dependency node filters that this filter ANDs together.
-     * 
+     *
      * @return the dependency node filters that this filter ANDs together
      */
-    public List<DependencyNodeFilter> getDependencyNodeFilters()
-    {
+    public List<DependencyNodeFilter> getDependencyNodeFilters() {
         return filters;
     }
 }

@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.graph;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph;
 
 /**
  * Indicates that a Maven project's dependency graph cannot be resolved.
@@ -25,9 +24,7 @@ package org.apache.maven.shared.dependency.graph;
  * @author Hervé Boutemy
  * @since 2.0
  */
-public class DependencyGraphBuilderException
-    extends Exception
-{
+public class DependencyGraphBuilderException extends Exception {
     private static final long serialVersionUID = -7428777046707410949L;
 
     // constructors -----------------------------------------------------------
@@ -35,17 +32,15 @@ public class DependencyGraphBuilderException
     /**
      * @param message   Message indicating why dependency graph could not be resolved.
      */
-    public DependencyGraphBuilderException( String message )
-    {
-        super( message );
+    public DependencyGraphBuilderException(String message) {
+        super(message);
     }
 
     /**
      * @param message   Message indicating why dependency graph could not be resolved.
      * @param cause     Throwable indicating at which point the graph failed to be resolved.
      */
-    public DependencyGraphBuilderException( String message, Throwable cause )
-    {
-        super( message, cause );
+    public DependencyGraphBuilderException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

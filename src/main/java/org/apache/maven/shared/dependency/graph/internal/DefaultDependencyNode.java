@@ -1,5 +1,3 @@
-package org.apache.maven.shared.dependency.graph.internal;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +7,7 @@ package org.apache.maven.shared.dependency.graph.internal;
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,6 +16,7 @@ package org.apache.maven.shared.dependency.graph.internal;
  * specific language governing permissions and limitations
  * under the License.
  */
+package org.apache.maven.shared.dependency.graph.internal;
 
 import java.util.List;
 
@@ -29,10 +28,9 @@ import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 /**
  * Default implementation of a DependencyNode.
  */
-public class DefaultDependencyNode implements DependencyNode
-{
+public class DefaultDependencyNode implements DependencyNode {
     private final Artifact artifact;
-    
+
     private final DependencyNode parent;
 
     private final String premanagedVersion;
@@ -56,9 +54,12 @@ public class DefaultDependencyNode implements DependencyNode
      * @param premanagedScope   the premanaged scope, may be {@code null}.
      * @param versionConstraint the version constraint, may be {@code null.}
      */
-    public DefaultDependencyNode( DependencyNode parent, Artifact artifact, String premanagedVersion,
-                                  String premanagedScope, String versionConstraint )
-    {
+    public DefaultDependencyNode(
+            DependencyNode parent,
+            Artifact artifact,
+            String premanagedVersion,
+            String premanagedScope,
+            String versionConstraint) {
         this.parent = parent;
         this.artifact = artifact;
         this.premanagedVersion = premanagedVersion;
@@ -66,10 +67,14 @@ public class DefaultDependencyNode implements DependencyNode
         this.versionConstraint = versionConstraint;
     }
 
-    public DefaultDependencyNode( DependencyNode parent, Artifact artifact, String premanagedVersion,
-                                  String premanagedScope, String versionConstraint, Boolean optional,
-                                  List<Exclusion> exclusions )
-    {
+    public DefaultDependencyNode(
+            DependencyNode parent,
+            Artifact artifact,
+            String premanagedVersion,
+            String premanagedScope,
+            String versionConstraint,
+            Boolean optional,
+            List<Exclusion> exclusions) {
         this.parent = parent;
         this.artifact = artifact;
         this.premanagedVersion = premanagedVersion;
@@ -78,10 +83,9 @@ public class DefaultDependencyNode implements DependencyNode
         this.optional = optional;
         this.exclusions = exclusions;
     }
-    
+
     // user to refer to winner
-    public DefaultDependencyNode( Artifact artifact )
-    {
+    public DefaultDependencyNode(Artifact artifact) {
         this.artifact = artifact;
         this.parent = null;
         this.premanagedScope = null;
@@ -91,34 +95,29 @@ public class DefaultDependencyNode implements DependencyNode
 
     /**
      * Applies the specified dependency node visitor to this dependency node and its children.
-     * 
+     *
      * @param visitor the dependency node visitor to use
      * @return the visitor result of ending the visit to this node
      * @since 1.1
      */
     @Override
-    public boolean accept( DependencyNodeVisitor visitor )
-    {
-        if ( visitor.visit( this ) )
-        {
-            for ( DependencyNode child : getChildren() )
-            {
-                if ( !child.accept( visitor ) )
-                {
+    public boolean accept(DependencyNodeVisitor visitor) {
+        if (visitor.visit(this)) {
+            for (DependencyNode child : getChildren()) {
+                if (!child.accept(visitor)) {
                     break;
                 }
             }
         }
 
-        return visitor.endVisit( this );
+        return visitor.endVisit(this);
     }
 
     /**
      * @return Artifact for this DependencyNode.
      */
     @Override
-    public Artifact getArtifact()
-    {
+    public Artifact getArtifact() {
         return artifact;
     }
 
@@ -126,8 +125,7 @@ public class DefaultDependencyNode implements DependencyNode
      *
      * @param children  List of DependencyNode to set as child nodes.
      */
-    public void setChildren( List<DependencyNode> children )
-    {
+    public void setChildren(List<DependencyNode> children) {
         this.children = children;
     }
 
@@ -135,8 +133,7 @@ public class DefaultDependencyNode implements DependencyNode
      * @return List of child nodes for this DependencyNode.
      */
     @Override
-    public List<DependencyNode> getChildren()
-    {
+    public List<DependencyNode> getChildren() {
         return children;
     }
 
@@ -144,38 +141,32 @@ public class DefaultDependencyNode implements DependencyNode
      * @return Parent of this DependencyNode.
      */
     @Override
-    public DependencyNode getParent()
-    {
+    public DependencyNode getParent() {
         return parent;
     }
 
     @Override
-    public String getPremanagedVersion()
-    {
+    public String getPremanagedVersion() {
         return premanagedVersion;
     }
 
     @Override
-    public String getPremanagedScope()
-    {
+    public String getPremanagedScope() {
         return premanagedScope;
     }
 
     @Override
-    public String getVersionConstraint()
-    {
+    public String getVersionConstraint() {
         return versionConstraint;
     }
 
     @Override
-    public Boolean getOptional()
-    {
+    public Boolean getOptional() {
         return optional;
     }
 
     @Override
-    public List<Exclusion> getExclusions()
-    {
+    public List<Exclusion> getExclusions() {
         return exclusions;
     }
 
@@ -183,8 +174,7 @@ public class DefaultDependencyNode implements DependencyNode
      * @return Stringified representation of this DependencyNode.
      */
     @Override
-    public String toNodeString()
-    {
-        return String.valueOf( artifact );
+    public String toNodeString() {
+        return String.valueOf(artifact);
     }
 }
