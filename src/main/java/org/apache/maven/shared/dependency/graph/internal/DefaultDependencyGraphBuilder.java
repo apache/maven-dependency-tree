@@ -129,7 +129,7 @@ public class DefaultDependencyGraphBuilder implements DependencyGraphBuilder {
         String premanagedScope = DependencyManagerUtils.getPremanagedScope(node);
 
         List<org.apache.maven.model.Exclusion> exclusions = null;
-        Boolean optional = null;
+        Boolean optional = artifact.isOptional();
         if (node.getDependency() != null) {
             exclusions = new ArrayList<>(node.getDependency().getExclusions().size());
             for (Exclusion exclusion : node.getDependency().getExclusions()) {

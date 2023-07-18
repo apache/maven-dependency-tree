@@ -175,6 +175,6 @@ public class DefaultDependencyNode implements DependencyNode {
      */
     @Override
     public String toNodeString() {
-        return String.valueOf(artifact);
+        return artifact + (Boolean.TRUE.equals(optional) ? " (optional)" : "");
     }
 }
