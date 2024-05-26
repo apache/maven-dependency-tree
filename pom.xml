@@ -28,7 +28,7 @@
   </parent>
 
   <artifactId>maven-dependency-tree</artifactId>
-  <version>3.3.0</version>
+  <version>3.3.1-SNAPSHOT</version>
 
   <name>Apache Maven Dependency Tree</name>
   <description>A tree-based API for resolution of Maven project dependencies</description>
@@ -42,7 +42,7 @@
   <scm>
     <connection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-tree.git</connection>
     <developerConnection>scm:git:https://gitbox.apache.org/repos/asf/maven-dependency-tree.git</developerConnection>
-    <tag>maven-dependency-tree-3.3.0</tag>
+    <tag>HEAD</tag>
     <url>https://github.com/apache/maven-dependency-tree/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
@@ -64,7 +64,7 @@
     <javaVersion>8</javaVersion>
     <mavenVersion>3.6.3</mavenVersion>
     <resolverVersion>1.4.1</resolverVersion>
-    <project.build.outputTimestamp>2024-05-26T18:02:40Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2024-05-26T18:03:01Z</project.build.outputTimestamp>
   </properties>
 
   <dependencies>
