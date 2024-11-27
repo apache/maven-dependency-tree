@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Exclusion;
+import org.apache.maven.shared.dependency.graph.ConflictData;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 
 class VerboseDependencyNode extends DefaultDependencyNode {
@@ -94,6 +95,11 @@ class VerboseDependencyNode extends DefaultDependencyNode {
         }
 
         return buffer.toString();
+    }
+
+    @Override
+    public ConflictData getConflictData() {
+        return data;
     }
 
     /**

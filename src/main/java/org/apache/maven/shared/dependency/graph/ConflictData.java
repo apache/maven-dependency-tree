@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.shared.dependency.graph.internal;
+package org.apache.maven.shared.dependency.graph;
 
 /**
  * Explicit subset of Aether's DependencyNode.getData().
