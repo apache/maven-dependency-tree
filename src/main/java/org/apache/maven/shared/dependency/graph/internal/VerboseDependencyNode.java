@@ -28,6 +28,7 @@ class VerboseDependencyNode extends DefaultDependencyNode {
 
     private final ConflictData data;
 
+    // CHECKSTYLE_OFF: ParameterNumber
     VerboseDependencyNode(
             DependencyNode parent,
             Artifact artifact,
@@ -38,6 +39,7 @@ class VerboseDependencyNode extends DefaultDependencyNode {
             List<Exclusion> exclusions,
             ConflictData data) {
         super(parent, artifact, premanagedVersion, premanagedScope, versionConstraint, optional, exclusions);
+        // CHECKSTYLE_ON: ParameterNumber
 
         this.data = data;
     }
