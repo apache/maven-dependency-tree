@@ -36,7 +36,7 @@ public class VerboseDependencyNodeTest {
         VerboseDependencyNode verboseDependencyNode =
                 new VerboseDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList(), conflictData);
 
-        assertEquals(verboseDependencyNode.getConflictData().getWinnerVersion(), "winnerVersion");
-        assertEquals(verboseDependencyNode.getConflictData().getIgnoredScope(), "ignoredScope");
+        assertEquals("winnerVersion", verboseDependencyNode.getConflictData().getWinnerVersion());
+        assertEquals("ignoredScope", verboseDependencyNode.getConflictData().getIgnoredScope());
     }
 }

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class DefaultDependencyNodeTest {
 
@@ -48,6 +49,6 @@ public class DefaultDependencyNodeTest {
         DefaultDependencyNode node =
                 new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList());
 
-        assertEquals(node.getConflictData(), null);
+        assertNull(node.getConflictData());
     }
 }
