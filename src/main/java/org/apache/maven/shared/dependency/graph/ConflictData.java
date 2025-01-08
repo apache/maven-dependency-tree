@@ -32,31 +32,70 @@ public class ConflictData {
 
     private Boolean originaOptionality;
 
+    /**
+     * Construct ConflictData. Containing information about conflicts during dependency resolution.
+     * Either this node lost the conflict and winnerVersion is set with the versionwof the winnig node,
+     * or this node won and winnerVersion is @code{null}.
+     * If this node won ignoredScope can contain potential scopes that were ignored during conflict resolution.
+     *
+     * @param winnerVersion the version of the dependency that was selected.
+     * @param ignoredScope  the scope
+     */
     public ConflictData(String winnerVersion, String ignoredScope) {
         this.winnerVersion = winnerVersion;
         this.ignoredScope = ignoredScope;
     }
 
+    /**
+     * In case of a conflict, the version of the dependency that was selected.
+     *
+     * @return the version of the dependency node that was selected.
+     */
     public String getWinnerVersion() {
         return winnerVersion;
     }
 
+    /**
+     * Original scope of a rejected dependency due to a conflict.
+     *
+     * @return the original scope of the dependency that was updated from.
+     */
     public String getOriginalScope() {
         return originalScope;
     }
 
+    /**
+     * Set original scope of a rejected dependency due to a conflict.
+     *
+     * @param originalScope the original scope of the dependency that was updated from.
+     */
     public void setOriginalScope(String originalScope) {
         this.originalScope = originalScope;
     }
 
+    /**
+     * Original optionality of a rejected dependency due to a conflict.
+     *
+     * @return the original optionality of the dependency.
+     */
     public Boolean getOriginaOptionality() {
         return originaOptionality;
     }
 
+    /**
+     * Set original optionality of a rejected dependency due to a conflict.
+     *
+     * @param originaOptionality the original optionality of the dependency.
+     */
     public void setOriginaOptionality(Boolean originaOptionality) {
         this.originaOptionality = originaOptionality;
     }
 
+    /**
+     * The scope of the dependency that was not updated to during dependency resolution.
+     *
+     * @return the scope of the dependency that was ignored and not updated to.
+     */
     public String getIgnoredScope() {
         return ignoredScope;
     }
