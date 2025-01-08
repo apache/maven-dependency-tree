@@ -49,7 +49,7 @@ public class ConflictData {
     /**
      * In case of a conflict, the version of the dependency that was selected.
      *
-     * @return the version of the dependency node that was selected.
+     * @return the version of the dependency node that was selected
      */
     public String getWinnerVersion() {
         return winnerVersion;
