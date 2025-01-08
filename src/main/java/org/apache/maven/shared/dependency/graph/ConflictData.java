@@ -30,16 +30,16 @@ public class ConflictData {
 
     private String ignoredScope;
 
-    private Boolean originaOptionality;
+    private Boolean originalOptionality;
 
     /**
      * Construct ConflictData. Containing information about conflicts during dependency resolution.
-     * Either this node lost the conflict and winnerVersion is set with the versionwof the winnig node,
+     * Either this node lost the conflict and winnerVersion is set with the version of the winnig node,
      * or this node won and winnerVersion is @code{null}.
-     * If this node won ignoredScope can contain potential scopes that were ignored during conflict resolution.
+     * If this node won, ignoredScope can contain potential scopes that were ignored during conflict resolution.
      *
-     * @param winnerVersion the version of the dependency that was selected.
-     * @param ignoredScope  the scope
+     * @param winnerVersion the version of the dependency that was selected
+     * @param ignoredScope  the scope of the dependency that was ignored and not updated to
      */
     public ConflictData(String winnerVersion, String ignoredScope) {
         this.winnerVersion = winnerVersion;
@@ -58,7 +58,7 @@ public class ConflictData {
     /**
      * Original scope of a rejected dependency due to a conflict.
      *
-     * @return the original scope of the dependency that was updated from.
+     * @return the original scope of the dependency that was updated from
      */
     public String getOriginalScope() {
         return originalScope;
@@ -67,7 +67,7 @@ public class ConflictData {
     /**
      * Set original scope of a rejected dependency due to a conflict.
      *
-     * @param originalScope the original scope of the dependency that was updated from.
+     * @param originalScope the original scope of the dependency that was updated from
      */
     public void setOriginalScope(String originalScope) {
         this.originalScope = originalScope;
@@ -76,25 +76,25 @@ public class ConflictData {
     /**
      * Original optionality of a rejected dependency due to a conflict.
      *
-     * @return the original optionality of the dependency.
+     * @return the original optionality of the dependency
      */
-    public Boolean getOriginaOptionality() {
-        return originaOptionality;
+    public Boolean getOriginalOptionality() {
+        return originalOptionality;
     }
 
     /**
      * Set original optionality of a rejected dependency due to a conflict.
      *
-     * @param originaOptionality the original optionality of the dependency.
+     * @param originalOptionality the original optionality of the dependency
      */
-    public void setOriginaOptionality(Boolean originaOptionality) {
-        this.originaOptionality = originaOptionality;
+    public void setOriginalOptionality(Boolean originalOptionality) {
+        this.originalOptionality = originalOptionality;
     }
 
     /**
      * The scope of the dependency that was not updated to during dependency resolution.
      *
-     * @return the scope of the dependency that was ignored and not updated to.
+     * @return the scope of the dependency that was ignored and not updated to
      */
     public String getIgnoredScope() {
         return ignoredScope;

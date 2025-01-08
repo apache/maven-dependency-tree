@@ -45,7 +45,7 @@ public class DefaultDependencyNodeTest {
     }
 
     @Test
-    public void defaultDependencyNode_should_return_null_conflict_data() {
+    public void defaultDependencyNodeHasNullConflictData() {
         DefaultDependencyNode node =
                 new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList());
 
