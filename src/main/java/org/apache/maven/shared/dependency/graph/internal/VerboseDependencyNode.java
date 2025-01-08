@@ -65,10 +65,6 @@ class VerboseDependencyNode extends DefaultDependencyNode {
             appender.append("scope managed from ", getPremanagedScope());
         }
 
-        if (data.getOriginalScope() != null) {
-            appender.append("scope updated from ", data.getOriginalScope());
-        }
-
         if (data.getIgnoredScope() != null) {
             appender.append("scope not updated to ", data.getIgnoredScope());
         }

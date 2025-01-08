@@ -26,11 +26,7 @@ package org.apache.maven.shared.dependency.graph;
 public class ConflictData {
     private String winnerVersion;
 
-    private String originalScope;
-
     private String ignoredScope;
-
-    private Boolean originalOptionality;
 
     /**
      * Construct ConflictData. Containing information about conflicts during dependency resolution.
@@ -53,42 +49,6 @@ public class ConflictData {
      */
     public String getWinnerVersion() {
         return winnerVersion;
-    }
-
-    /**
-     * Original scope of a rejected dependency due to a conflict.
-     *
-     * @return the original scope of the dependency that was updated from
-     */
-    public String getOriginalScope() {
-        return originalScope;
-    }
-
-    /**
-     * Set original scope of a rejected dependency due to a conflict.
-     *
-     * @param originalScope the original scope of the dependency that was updated from
-     */
-    public void setOriginalScope(String originalScope) {
-        this.originalScope = originalScope;
-    }
-
-    /**
-     * Original optionality of a rejected dependency due to a conflict.
-     *
-     * @return the original optionality of the dependency
-     */
-    public Boolean getOriginalOptionality() {
-        return originalOptionality;
-    }
-
-    /**
-     * Set original optionality of a rejected dependency due to a conflict.
-     *
-     * @param originalOptionality the original optionality of the dependency
-     */
-    public void setOriginalOptionality(Boolean originalOptionality) {
-        this.originalOptionality = originalOptionality;
     }
 
     /**
