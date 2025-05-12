@@ -46,8 +46,8 @@
     <url>https://github.com/apache/maven-dependency-tree/tree/${project.scm.tag}</url>
   </scm>
   <issueManagement>
-    <system>jira</system>
-    <url>https://issues.apache.org/jira/issues/?jql=project+%3D+MSHARED+AND+component+%3D+maven-dependency-tree</url>
+    <system>GitHub Issues</system>
+    <url>https://github.com/apache/maven-dependency-tree/issues</url>
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
