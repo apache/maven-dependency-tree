@@ -20,35 +20,23 @@ package org.apache.maven.shared.dependency.graph.internal;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.shared.dependency.graph.ConflictData;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class DefaultDependencyNodeTest {
+public class VerboseDependencyNodeTest {
 
     private final Artifact artifact = new DefaultArtifact("group", "artifact", "1.2", "compile", "jar", "", null);
 
     @Test
-    public void nodeString_should_display_if_dependency_is_optonal() {
-        DefaultDependencyNode optionalNode =
-                new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", true, emptyList());
-        assertEquals("group:artifact:jar:1.2:compile (optional)", optionalNode.toNodeString());
-    }
+    public void verboseDependencyNode_should_return_conflict_data() {
+        ConflictData conflictData = new ConflictData("winnerVersion", "ignoredScope");
+        VerboseDependencyNode verboseDependencyNode =
+                new VerboseDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList(), conflictData);
 
-    @Test
-    public void nodeString_for_mandatory_depenendency_does_not_contain_optional_information() {
-        DefaultDependencyNode optionalNode =
-                new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList());
-        assertEquals("group:artifact:jar:1.2:compile", optionalNode.toNodeString());
-    }
-
-    @Test
-    public void defaultDependencyNodeHasNullConflictData() {
-        DefaultDependencyNode node =
-                new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList());
-
-        assertNull(node.getConflictData());
+        assertEquals("winnerVersion", verboseDependencyNode.getConflictData().getWinnerVersion());
+        assertEquals("ignoredScope", verboseDependencyNode.getConflictData().getIgnoredScope());
     }
 }
