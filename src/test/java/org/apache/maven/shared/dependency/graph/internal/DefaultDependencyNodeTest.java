@@ -30,14 +30,14 @@ public class DefaultDependencyNodeTest {
     private final Artifact artifact = new DefaultArtifact("group", "artifact", "1.2", "compile", "jar", "", null);
 
     @Test
-    public void nodeString_should_display_if_dependency_is_optonal() {
+    public void nodeStringShouldDisplayIfDependencyIsOptonal() {
         DefaultDependencyNode optionalNode =
                 new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", true, emptyList());
         assertEquals("group:artifact:jar:1.2:compile (optional)", optionalNode.toNodeString());
     }
 
     @Test
-    public void nodeString_for_mandatory_depenendency_does_not_contain_optional_information() {
+    public void nodeStringForMandatoryDepenendencyDoesNotContainOptionalInformation() {
         DefaultDependencyNode optionalNode =
                 new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList());
         assertEquals("group:artifact:jar:1.2:compile", optionalNode.toNodeString());
