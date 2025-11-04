@@ -25,19 +25,19 @@ import org.junit.jupiter.api.Test;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DefaultDependencyNodeTest {
+class DefaultDependencyNodeTest {
 
     private final Artifact artifact = new DefaultArtifact("group", "artifact", "1.2", "compile", "jar", "", null);
 
     @Test
-    public void nodeStringShouldDisplayIfDependencyIsOptonal() {
+    void nodeStringShouldDisplayIfDependencyIsOptonal() {
         DefaultDependencyNode optionalNode =
                 new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", true, emptyList());
         assertEquals("group:artifact:jar:1.2:compile (optional)", optionalNode.toNodeString());
     }
 
     @Test
-    public void nodeStringForMandatoryDepenendencyDoesNotContainOptionalInformation() {
+    void nodeStringForMandatoryDepenendencyDoesNotContainOptionalInformation() {
         DefaultDependencyNode optionalNode =
                 new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList());
         assertEquals("group:artifact:jar:1.2:compile", optionalNode.toNodeString());
