@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.shared.dependency.graph.internal;
+package org.apache.maven.shared.dependency.graph;
 
 /**
  * Explicit subset of Aether's DependencyNode.getData().
@@ -26,37 +26,36 @@ package org.apache.maven.shared.dependency.graph.internal;
 public class ConflictData {
     private String winnerVersion;
 
-    private String originalScope;
-
     private String ignoredScope;
 
-    private Boolean originaOptionality;
-
+    /**
+     * Construct ConflictData. Containing information about conflicts during dependency resolution.
+     * Either this node lost the conflict and winnerVersion is set with the version of the winnig node,
+     * or this node won and winnerVersion is @code{null}.
+     * If this node won, ignoredScope can contain potential scopes that were ignored during conflict resolution.
+     *
+     * @param winnerVersion the version of the dependency that was selected
+     * @param ignoredScope  the scope of the dependency that was ignored and not updated to
+     */
     public ConflictData(String winnerVersion, String ignoredScope) {
         this.winnerVersion = winnerVersion;
         this.ignoredScope = ignoredScope;
     }
 
+    /**
+     * In case of a conflict, the version of the dependency that was selected.
+     *
+     * @return the version of the dependency node that was selected
+     */
     public String getWinnerVersion() {
         return winnerVersion;
     }
 
-    public String getOriginalScope() {
-        return originalScope;
-    }
-
-    public void setOriginalScope(String originalScope) {
-        this.originalScope = originalScope;
-    }
-
-    public Boolean getOriginaOptionality() {
-        return originaOptionality;
-    }
-
-    public void setOriginaOptionality(Boolean originaOptionality) {
-        this.originaOptionality = originaOptionality;
-    }
-
+    /**
+     * The scope of the dependency that was not updated to during dependency resolution.
+     *
+     * @return the scope of the dependency that was ignored and not updated to
+     */
     public String getIgnoredScope() {
         return ignoredScope;
     }
