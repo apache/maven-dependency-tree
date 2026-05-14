@@ -23,7 +23,7 @@
   <parent>
     <groupId>org.apache.maven.shared</groupId>
     <artifactId>maven-shared-components</artifactId>
-    <version>47</version>
+    <version>48</version>
     <relativePath />
   </parent>
 
@@ -165,7 +165,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-invoker-plugin</artifactId>
-            <version>3.10.0</version>
             <configuration>
               <debug>true</debug>
               <projectsDirectory>src/it</projectsDirectory>
