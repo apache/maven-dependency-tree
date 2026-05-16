@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Exclusion;
+import org.apache.maven.shared.dependency.graph.ConflictData;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 
 class VerboseDependencyNode extends DefaultDependencyNode {
@@ -66,10 +67,6 @@ class VerboseDependencyNode extends DefaultDependencyNode {
             appender.append("scope managed from ", getPremanagedScope());
         }
 
-        if (data.getOriginalScope() != null) {
-            appender.append("scope updated from ", data.getOriginalScope());
-        }
-
         if (data.getIgnoredScope() != null) {
             appender.append("scope not updated to ", data.getIgnoredScope());
         }
@@ -96,6 +93,11 @@ class VerboseDependencyNode extends DefaultDependencyNode {
         }
 
         return buffer.toString();
+    }
+
+    @Override
+    public ConflictData getConflictData() {
+        return data;
     }
 
     /**
