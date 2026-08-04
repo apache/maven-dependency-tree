@@ -30,7 +30,7 @@ public class ConflictData {
 
     /**
      * Construct ConflictData. Containing information about conflicts during dependency resolution.
-     * Either this node lost the conflict and winnerVersion is set with the version of the winnig node,
+     * Either this node lost the conflict and winnerVersion is set with the version of the winning node,
      * or this node won and winnerVersion is @code{null}.
      * If this node won, ignoredScope can contain potential scopes that were ignored during conflict resolution.
      *
