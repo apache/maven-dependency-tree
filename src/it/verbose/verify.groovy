@@ -17,14 +17,17 @@
  * under the License.
  */
 
+// Maven 4 applies dependency management from transitive POMs too, see #146
+def suffix = mavenVersion.startsWith( '4.' ) ? "-v4" : ""
+
 def actual = new File( basedir, "target/tree-verbose.txt" ).readLines()
 // omitted for cycle not supported anymore, but should probably return
 // omitted for exclusion is not supported yet
-def expected = new File( basedir, "expected-verbose.txt" ).readLines().findAll{!((it.contains('omitted for cycle')||it.contains('omitted for exclusion')))}
+def expected = new File( basedir, "expected-verbose${suffix}.txt" ).readLines().findAll{!((it.contains('omitted for cycle')||it.contains('omitted for exclusion')))}
 
 assert actual.equals( expected )
 
 actual = new File( basedir, "target/tree-default.txt" ).readLines()
-expected = new File( basedir, "expected-default.txt" ).readLines()
+expected = new File( basedir, "expected-default${suffix}.txt" ).readLines()
 
 assert actual.equals( expected )

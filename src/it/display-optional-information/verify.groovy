@@ -18,6 +18,9 @@
  */
 
 
+// Maven 4 applies dependency management from transitive POMs too, see #146
+def suffix = mavenVersion.startsWith( '4.' ) ? "-v4" : ""
+
 actual = new File( basedir, "target/tree.txt" ).readLines()
-expected = new File( basedir, "expected.txt" ).readLines()
+expected = new File( basedir, "expected${suffix}.txt" ).readLines()
 assert actual.equals( expected )

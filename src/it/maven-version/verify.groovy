@@ -17,21 +17,10 @@
  * under the License.
  */
 
-import java.io.*;
+// Maven 4 applies dependency management from transitive POMs too, see #146
+def suffix = mavenVersion.startsWith( '4.' ) ? "-v4" : ""
 
-import org.codehaus.plexus.util.*;
+def actual = new File( basedir, "target/tree.txt" ).readLines()
+def expected = new File( basedir, "expected${suffix}.txt" ).readLines()
 
-String actual = FileUtils.fileRead( new File( basedir, "target/tree.txt" ) );
-String expected = FileUtils.fileRead( new File( basedir, "expected.txt" ) );
-
-actual = actual.replaceAll( "[\n\r]+", "\n" );
-expected = expected.replaceAll( "[\n\r]+", "\n" );
-
-System.out.println( "Checking dependency tree..." );
-
-if ( !actual.equals( expected ) )
-{
-    throw new Exception( "Unexpected dependency tree" );
-}
-
-return true;
+assert actual.equals( expected )
