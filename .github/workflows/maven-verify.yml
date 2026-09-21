@@ -27,5 +27,3 @@ jobs:
     uses: apache/maven-gh-actions-shared/.github/workflows/maven-verify.yml@v5
     with:
       maven4-enabled: true
-      # the Maven 4 jobs are excluded until #146 is resolved
-      matrix-exclude: '[{"maven": "4.0.0-rc-6"}]'
