@@ -117,31 +117,30 @@
   </dependencies>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <configuration>
+            <inputExcludes combine.children="append">
+
+              <!--
+          These files contains the expected output of this component and can not contain a license header.
+          -->
+              <exclude>src/it/*/expected*.txt</exclude>
+
+            </inputExcludes>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.eclipse.sisu</groupId>
         <artifactId>sisu-maven-plugin</artifactId>
       </plugin>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <configuration>
-          <excludes>
-            <!--
-              These files contains the expected output of this component and can not contain a license header.
-            -->
-            <exclude>src/it/*/expected*.txt</exclude>
-          </excludes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>rat-check</id>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -158,6 +157,7 @@
   </build>
 
   <profiles>
+
     <profile>
       <id>run-its</id>
       <build>
