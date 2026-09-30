@@ -18,132 +18,51 @@
  */
 package org.apache.maven.shared.dependency.graph;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
-import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
-import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.shared.dependency.graph.internal.DirectScopeDependencySelector;
-import org.apache.maven.shared.dependency.graph.internal.VerboseJavaScopeSelector;
-import org.eclipse.aether.collection.DependencyGraphTransformer;
-import org.eclipse.aether.collection.DependencySelector;
-import org.eclipse.aether.util.artifact.JavaScopes;
-import org.eclipse.aether.util.graph.manager.DependencyManagerUtils;
-import org.eclipse.aether.util.graph.selector.AndDependencySelector;
-import org.eclipse.aether.util.graph.selector.ExclusionDependencySelector;
-import org.eclipse.aether.util.graph.selector.OptionalDependencySelector;
-import org.eclipse.aether.util.graph.transformer.ConflictResolver;
-import org.eclipse.aether.util.graph.transformer.JavaScopeDeriver;
-import org.eclipse.aether.util.graph.transformer.NearestVersionSelector;
-import org.eclipse.aether.util.graph.transformer.SimpleOptionalitySelector;
+import org.apache.maven.api.Dependency;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
 
 /**
- * <div>
- * This class will carry various options used by
- * {@link DependencyCollectorBuilder#collectDependencyGraph(DependencyCollectorRequest)}
- * </div>
- * <div>
- * There is a set of default values such:
- * </div>
- * <div>
- * DependencySelector
- * <pre>
- *  new AndDependencySelector(
- *             new DirectScopeDependencySelector( JavaScopes.TEST ),
- *             new DirectScopeDependencySelector( JavaScopes.PROVIDED ),
- *             new OptionalDependencySelector(),
- *             new ExclusionDependencySelector() );
- * </pre>
- * </div>
- * <div>
- * DependencyGraphTransformer
- * <pre>
- * new ConflictResolver(
- *             new NearestVersionSelector(),
- *             new VerboseJavaScopeSelector(),
- *             new SimpleOptionalitySelector(),
- *             new JavaScopeDeriver() );
- * </pre>
- * </div>
- * <div>
- * configProperties have 2 default values
- * <pre>
- *   ConflictResolver.CONFIG_PROP_VERBOSE, true
- *   DependencyManagerUtils.CONFIG_PROP_VERBOSE, true
- * </pre>
- * <a href="https://maven.apache.org/resolver/configuration.html">Move Resolver configuration properties</a>.
- * </div>
+ * This class carries the options of
+ * {@link DependencyCollectorBuilder#collectDependencyGraph(DependencyCollectorRequest)}.
+ * <p>
+ * Unlike the Maven 3 based version, it can no longer carry a Resolver {@code DependencySelector},
+ * {@code DependencyGraphTransformer} or configuration properties: the Maven 4 {@code DependencyResolverRequest}
+ * only knows a {@code verbose} switch, and the collection is done with the selectors and transformers of the session.
+ * </p>
+ *
  * @since 3.2.1
  */
 public class DependencyCollectorRequest {
 
-    private final ProjectBuildingRequest buildingRequest;
+    private final Session session;
 
-    private ArtifactFilter filter;
+    private final Project project;
 
-    private Map<String, Object> configProperties = new HashMap<>();
+    private final Predicate<Dependency> filter;
 
-    private DependencySelector dependencySelector = new AndDependencySelector(
-            new DirectScopeDependencySelector(JavaScopes.TEST),
-            new DirectScopeDependencySelector(JavaScopes.PROVIDED),
-            new OptionalDependencySelector(),
-            new ExclusionDependencySelector());
-
-    private DependencyGraphTransformer dependencyGraphTransformer = new ConflictResolver(
-            new NearestVersionSelector(),
-            new VerboseJavaScopeSelector(),
-            new SimpleOptionalitySelector(),
-            new JavaScopeDeriver());
-
-    public DependencyCollectorRequest(ProjectBuildingRequest buildingRequest) {
-        this(buildingRequest, null);
+    public DependencyCollectorRequest(Session session, Project project) {
+        this(session, project, null);
     }
 
-    public DependencyCollectorRequest(ProjectBuildingRequest buildingRequest, ArtifactFilter filter) {
-        Objects.requireNonNull(buildingRequest, "ProjectBuildingRequest cannot be null");
-        this.buildingRequest = buildingRequest;
+    public DependencyCollectorRequest(Session session, Project project, Predicate<Dependency> filter) {
+        this.session = Objects.requireNonNull(session, "session cannot be null");
+        this.project = Objects.requireNonNull(project, "project cannot be null");
         this.filter = filter;
-        configProperties.put(ConflictResolver.CONFIG_PROP_VERBOSE, true);
-        configProperties.put(DependencyManagerUtils.CONFIG_PROP_VERBOSE, true);
     }
 
-    public ProjectBuildingRequest getBuildingRequest() {
-        return buildingRequest;
+    public Session getSession() {
+        return session;
     }
 
-    public ArtifactFilter getFilter() {
+    public Project getProject() {
+        return project;
+    }
+
+    public Predicate<Dependency> getFilter() {
         return filter;
-    }
-
-    public DependencySelector getDependencySelector() {
-        return dependencySelector;
-    }
-
-    public DependencyCollectorRequest dependencySelector(DependencySelector dependencySelector) {
-        this.dependencySelector = dependencySelector;
-        return this;
-    }
-
-    public DependencyGraphTransformer getDependencyGraphTransformer() {
-        return dependencyGraphTransformer;
-    }
-
-    public DependencyCollectorRequest dependencyGraphTransformer(
-            DependencyGraphTransformer dependencyGraphTransformer) {
-        this.dependencyGraphTransformer = dependencyGraphTransformer;
-        return this;
-    }
-
-    public Map<String, Object> getConfigProperties() {
-        return this.configProperties;
-    }
-
-    public void addConfigProperty(String key, Object value) {
-        this.configProperties.put(key, value);
-    }
-
-    public void removeConfigProperty(String key) {
-        this.configProperties.remove(key);
     }
 }

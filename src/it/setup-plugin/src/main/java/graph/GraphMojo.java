@@ -1,9 +1,5 @@
 package graph;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -23,71 +19,65 @@ import java.io.Writer;
  * under the License.
  */
 
-import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
-import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.plugin.MojoExecutionException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
+import org.apache.maven.api.di.Inject;
+import org.apache.maven.api.plugin.Mojo;
+import org.apache.maven.api.plugin.MojoException;
+import org.apache.maven.api.plugin.annotations.Parameter;
 import org.apache.maven.shared.dependency.graph.DependencyCollectorBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.traversal.SerializingDependencyNodeVisitor;
 
-@Mojo( name = "graph" )
+@org.apache.maven.api.plugin.annotations.Mojo( name = "graph" )
 public class GraphMojo
-    extends AbstractMojo
+    implements Mojo
 {
 
-    @Parameter( defaultValue = "${session}", readonly = true, required = true )
-    private MavenSession session;
+    @Inject
+    private Session session;
 
-    @Parameter( defaultValue = "${project}", readonly = true, required = true )
-    private MavenProject project;
-    
+    @Inject
+    private Project project;
+
     @Parameter
-    private ArtifactFilter artifactFilter;
-    
-    @Parameter
-    private File outputFile;
-    
+    private Path outputFile;
+
     @Parameter
     private boolean verbose;
 
-    @Component
+    @Inject
     private DependencyGraphBuilder graphBuilder;
 
-    @Component
+    @Inject
     private DependencyCollectorBuilder collectorBuilder;
-    
+
     @Override
-    public void execute() throws MojoExecutionException
+    public void execute() throws MojoException
     {
-        // Code currently assumes project has been set...
-        ProjectBuildingRequest buildingRequest = new DefaultProjectBuildingRequest( session.getProjectBuildingRequest() );
-        buildingRequest.setProject( project );
-        
         try
         {
             DependencyNode node;
             if ( verbose )
             {
-                node = collectorBuilder.collectDependencyGraph( buildingRequest, artifactFilter );
+                node = collectorBuilder.collectDependencyGraph( session, project, null );
             }
             else
             {
-                node = graphBuilder.buildDependencyGraph( buildingRequest, artifactFilter );
+                node = graphBuilder.buildDependencyGraph( session, project, null );
             }
-            
+
             if ( outputFile != null )
             {
-                outputFile.getParentFile().mkdirs();
+                Path output = project.getBasedir().resolve( outputFile );
+                Files.createDirectories( output.getParent() );
 
-                try ( Writer writer = new FileWriter( outputFile ) )
+                try ( java.io.Writer writer = Files.newBufferedWriter( output ) )
                 {
                     node.accept( new SerializingDependencyNodeVisitor( writer,
                                                                        SerializingDependencyNodeVisitor.STANDARD_TOKENS ) );
@@ -96,10 +86,8 @@ public class GraphMojo
         }
         catch ( Exception e ) // Catch all is good enough for IT
         {
-            throw new MojoExecutionException( "Failed to build dependency graph", e );
+            throw new MojoException( "Failed to build dependency graph", e );
         }
     }
 
-    
-    
 }

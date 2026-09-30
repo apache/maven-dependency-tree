@@ -81,11 +81,9 @@ public class BuildingDependencyNodeVisitor implements DependencyNodeVisitor {
         DefaultDependencyNode newNode = new DefaultDependencyNode(
                 parentNodes.isEmpty() ? null : parentNodes.peek(),
                 node.getArtifact(),
-                node.getPremanagedVersion(),
-                node.getPremanagedScope(),
-                node.getVersionConstraint(),
-                node.getOptional(),
-                node.getExclusions());
+                node.getDependency(),
+                node.getExclusions(),
+                node.toNodeString());
         newNode.setChildren(new ArrayList<>());
 
         if (parentNodes.empty()) {

@@ -20,8 +20,9 @@ package org.apache.maven.shared.dependency.graph;
 
 import java.util.List;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.model.Exclusion;
+import org.apache.maven.api.Artifact;
+import org.apache.maven.api.Dependency;
+import org.apache.maven.api.Exclusion;
 import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 
 /**
@@ -36,6 +37,14 @@ public interface DependencyNode {
      * @return Artifact for this DependencyNode.
      */
     Artifact getArtifact();
+
+    /**
+     * The dependency (scope, type, optional flag) that led to this node.
+     *
+     * @return the dependency, or {@code null} for the root node, which is the project itself
+     * @since 4.0.0
+     */
+    Dependency getDependency();
 
     /**
      * @return children of this DependencyNode.
@@ -59,28 +68,6 @@ public interface DependencyNode {
     DependencyNode getParent();
 
     /**
-     * Gets the version or version range for the dependency before dependency management was applied (if any).
-     *
-     * @return The dependency version before dependency management or {@code null} if the version was not managed.
-     */
-    String getPremanagedVersion();
-
-    /**
-     * Gets the scope for the dependency before dependency management was applied (if any).
-     *
-     * @return The dependency scope before dependency management or {@code null} if the scope was not managed.
-     */
-    String getPremanagedScope();
-
-    /**
-     * A constraint on versions for a dependency. A constraint can either consist of one or more version ranges or a
-     * single version.
-     *
-     * @return The constraint on the dependency.
-     */
-    String getVersionConstraint();
-
-    /**
      * Returns a string representation of this dependency node.
      *
      * @return the string representation
@@ -88,7 +75,7 @@ public interface DependencyNode {
     String toNodeString();
 
     /**
-     * @return true for an optional dependency.
+     * @return true for an optional dependency, {@code null} for the root node.
      */
     Boolean getOptional();
 

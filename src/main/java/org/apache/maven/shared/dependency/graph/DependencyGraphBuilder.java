@@ -18,14 +18,14 @@
  */
 package org.apache.maven.shared.dependency.graph;
 
-import java.util.Collection;
+import java.util.function.Predicate;
 
-import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.api.Dependency;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
 
 /**
- * Maven project dependency graph builder API, neutral against Maven 2 or Maven 3.
+ * Maven project dependency graph builder API, on top of the Maven 4 {@code DependencyResolver} service.
  *
  * @author Hervé Boutemy
  * @since 2.0
@@ -34,27 +34,12 @@ public interface DependencyGraphBuilder {
     /**
      * Build the dependency graph.
      *
-     * @param buildingRequest the buildingRequest
-     * @param filter artifact filter (can be <code>null</code>)
+     * @param session the Maven session
+     * @param project the project to process the dependencies of
+     * @param filter dependency filter (can be <code>null</code>)
      * @return the dependency graph
      * @throws DependencyGraphBuilderException if some of the dependencies could not be resolved.
      */
-    DependencyNode buildDependencyGraph(ProjectBuildingRequest buildingRequest, ArtifactFilter filter)
+    DependencyNode buildDependencyGraph(Session session, Project project, Predicate<Dependency> filter)
             throws DependencyGraphBuilderException;
-
-    /**
-     *
-     * @param buildingRequest the buildingRequest
-     * @param filter artifact filter (can be <code>null</code>)
-     * @param reactorProjects ignored
-     * @return the dependency graph
-     * @throws DependencyGraphBuilderException if some of the dependencies could not be resolved.
-     * @deprecated Use {@link #buildDependencyGraph(ProjectBuildingRequest, ArtifactFilter)} instead
-     */
-    @Deprecated
-    default DependencyNode buildDependencyGraph(
-            ProjectBuildingRequest buildingRequest, ArtifactFilter filter, Collection<MavenProject> reactorProjects)
-            throws DependencyGraphBuilderException {
-        return buildDependencyGraph(buildingRequest, filter);
-    }
 }

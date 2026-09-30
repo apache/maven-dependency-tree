@@ -22,18 +22,18 @@ package org.apache.maven.its.deptree;
 import org.apache.maven.AbstractMavenLifecycleParticipant;
 import org.apache.maven.MavenExecutionException;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingRequest;
+import org.apache.maven.api.Project;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.util.FileUtils;
+import org.apache.maven.shared.dependency.graph.internal.DefaultDependencyGraphBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 /**
@@ -48,14 +48,14 @@ import java.util.List;
  * that they exist so that we can add a placeholder for them onto the classpath,
  * which we can replace with the real classes once they are built.
  */
-@Component( role = AbstractMavenLifecycleParticipant.class, hint = "default" )
+@Named
+@Singleton
 public final class ResolveDependenciesLifecycleParticipant extends AbstractMavenLifecycleParticipant
 {
-    @Requirement( hint = "default" )
-    private DependencyGraphBuilder dependencyGraphBuilder;
+    // the Maven 4 DI index of the library is not read by a core extension, so create the (stateless) builder directly
+    private final DependencyGraphBuilder dependencyGraphBuilder = new DefaultDependencyGraphBuilder();
 
-    @Requirement
-    private Logger log;
+    private final Logger log = LoggerFactory.getLogger( ResolveDependenciesLifecycleParticipant.class );
 
     @Override
     public void afterProjectsRead( MavenSession session ) throws MavenExecutionException
@@ -63,17 +63,12 @@ public final class ResolveDependenciesLifecycleParticipant extends AbstractMaven
         log.info( "" );
         log.info( "ResolveDependenciesLifecycleParticipant#afterProjectsRead" );
 
-        final List<MavenProject> projects = session.getProjects();
+        final List<Project> projects = session.getSession().getProjects();
         File basedir = new File( session.getExecutionRootDirectory() );
 
-        for ( MavenProject project : projects )
+        for ( Project project : projects )
         {
-            ProjectBuildingRequest buildingRequest =
-                new DefaultProjectBuildingRequest( session.getProjectBuildingRequest() );
-            
-            buildingRequest.setProject( project );
-            
-            log.info( "building dependency graph for project " + project.getArtifact() );
+            log.info( "building dependency graph for project " + project.getPomArtifact() );
 
             File resolved = new File( basedir, "resolved-" + project.getArtifactId() + ".txt" );
 
@@ -81,7 +76,7 @@ public final class ResolveDependenciesLifecycleParticipant extends AbstractMaven
             {
                 log.info( "building without reactor projects" );
                 // resolution without reactor projects, to check that it is not possible at this point
-                dependencyGraphBuilder.buildDependencyGraph( buildingRequest, null );
+                dependencyGraphBuilder.buildDependencyGraph( session.getSession(), project, null );
             }
             catch ( DependencyGraphBuilderException e )
             {
@@ -89,7 +84,7 @@ public final class ResolveDependenciesLifecycleParticipant extends AbstractMaven
 
                 try
                 {
-                    FileUtils.fileWrite( resolved.getAbsolutePath(), e.getMessage() );
+                    Files.writeString( resolved.toPath(), e.getMessage() );
                 }
                 catch ( IOException ioe )
                 {

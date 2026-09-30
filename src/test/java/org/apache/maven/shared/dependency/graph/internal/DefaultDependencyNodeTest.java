@@ -18,28 +18,78 @@
  */
 package org.apache.maven.shared.dependency.graph.internal;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.DefaultArtifact;
+import org.apache.maven.api.Artifact;
+import org.apache.maven.api.Dependency;
+import org.apache.maven.api.DependencyScope;
+import org.apache.maven.api.Type;
+import org.apache.maven.api.Version;
 import org.junit.jupiter.api.Test;
 
-import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class DefaultDependencyNodeTest {
 
-    private final Artifact artifact = new DefaultArtifact("group", "artifact", "1.2", "compile", "jar", "", null);
+    private Dependency dependency(boolean optional, String classifier) {
+        Dependency dependency = mock(Dependency.class);
+        Type type = mock(Type.class);
+        when(type.id()).thenReturn("jar");
+        Version version = mock(Version.class);
+        when(version.toString()).thenReturn("1.2");
+        when(dependency.getGroupId()).thenReturn("group");
+        when(dependency.getArtifactId()).thenReturn("artifact");
+        when(dependency.getVersion()).thenReturn(version);
+        when(dependency.getClassifier()).thenReturn(classifier);
+        when(dependency.getType()).thenReturn(type);
+        when(dependency.getScope()).thenReturn(DependencyScope.COMPILE);
+        when(dependency.isOptional()).thenReturn(optional);
+        return dependency;
+    }
 
     @Test
     void nodeStringShouldDisplayIfDependencyIsOptonal() {
-        DefaultDependencyNode optionalNode =
-                new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", true, emptyList());
+        Dependency dependency = dependency(true, "");
+        DefaultDependencyNode optionalNode = new DefaultDependencyNode(null, dependency, dependency, null, null);
         assertEquals("group:artifact:jar:1.2:compile (optional)", optionalNode.toNodeString());
+        assertEquals(Boolean.TRUE, optionalNode.getOptional());
     }
 
     @Test
     void nodeStringForMandatoryDepenendencyDoesNotContainOptionalInformation() {
-        DefaultDependencyNode optionalNode =
-                new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList());
-        assertEquals("group:artifact:jar:1.2:compile", optionalNode.toNodeString());
+        Dependency dependency = dependency(false, "");
+        DefaultDependencyNode mandatoryNode = new DefaultDependencyNode(null, dependency, dependency, null, null);
+        assertEquals("group:artifact:jar:1.2:compile", mandatoryNode.toNodeString());
+        assertEquals(Boolean.FALSE, mandatoryNode.getOptional());
+    }
+
+    @Test
+    void nodeStringContainsClassifier() {
+        Dependency dependency = dependency(false, "tests");
+        DefaultDependencyNode node = new DefaultDependencyNode(null, dependency, dependency, null, null);
+        assertEquals("group:artifact:jar:tests:1.2:compile", node.toNodeString());
+    }
+
+    @Test
+    void rootNodeHasNoScopeAndNoOptionalFlag() {
+        Artifact artifact = mock(Artifact.class);
+        Version version = mock(Version.class);
+        when(version.toString()).thenReturn("1.2");
+        when(artifact.getGroupId()).thenReturn("group");
+        when(artifact.getArtifactId()).thenReturn("artifact");
+        when(artifact.getVersion()).thenReturn(version);
+        when(artifact.getClassifier()).thenReturn("");
+        when(artifact.getExtension()).thenReturn("jar");
+        DefaultDependencyNode root = new DefaultDependencyNode(artifact);
+        assertEquals("group:artifact:jar:1.2", root.toNodeString());
+        assertNull(root.getOptional());
+    }
+
+    @Test
+    void explicitNodeStringWins() {
+        Dependency dependency = dependency(true, "");
+        DefaultDependencyNode node = new DefaultDependencyNode(null, dependency, dependency, null, "custom");
+        assertEquals("custom", node.toNodeString());
     }
 }

@@ -18,12 +18,15 @@
  */
 package org.apache.maven.shared.dependency.graph;
 
-import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
-import org.apache.maven.project.ProjectBuildingRequest;
+import java.util.function.Predicate;
+
+import org.apache.maven.api.Dependency;
+import org.apache.maven.api.Project;
+import org.apache.maven.api.Session;
 
 /**
- * Maven project dependency raw dependency collector API, providing an abstraction layer against Maven 3 and Maven 3.1+
- * particular Aether implementations.
+ * Maven project dependency raw dependency collector API, on top of the verbose mode of the Maven 4
+ * {@code DependencyResolver} service.
  *
  * @author Gabriel Belingueres
  * @since 3.1.0
@@ -34,14 +37,15 @@ public interface DependencyCollectorBuilder {
      * collect the project's raw dependency graph, with information to allow the API client to reason on its own about
      * dependencies.
      *
-     * @param buildingRequest the request with the project to process its dependencies.
-     * @param filter an artifact filter if not all dependencies are required (can be <code>null</code>)
+     * @param session the Maven session
+     * @param project the project to process the dependencies of
+     * @param filter a dependency filter if not all dependencies are required (can be <code>null</code>)
      * @return the raw dependency tree
      * @throws DependencyCollectorBuilderException if some of the dependencies could not be collected.
      */
-    default DependencyNode collectDependencyGraph(ProjectBuildingRequest buildingRequest, ArtifactFilter filter)
+    default DependencyNode collectDependencyGraph(Session session, Project project, Predicate<Dependency> filter)
             throws DependencyCollectorBuilderException {
-        return collectDependencyGraph(new DependencyCollectorRequest(buildingRequest, filter));
+        return collectDependencyGraph(new DependencyCollectorRequest(session, project, filter));
     }
 
     /**

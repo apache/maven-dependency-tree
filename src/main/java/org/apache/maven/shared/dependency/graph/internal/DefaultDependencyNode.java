@@ -18,10 +18,12 @@
  */
 package org.apache.maven.shared.dependency.graph.internal;
 
+import java.util.Collections;
 import java.util.List;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.model.Exclusion;
+import org.apache.maven.api.Artifact;
+import org.apache.maven.api.Dependency;
+import org.apache.maven.api.Exclusion;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 
@@ -31,66 +33,42 @@ import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 public class DefaultDependencyNode implements DependencyNode {
     private final Artifact artifact;
 
+    private final Dependency dependency;
+
     private final DependencyNode parent;
 
-    private final String premanagedVersion;
+    private final List<Exclusion> exclusions;
 
-    private final String premanagedScope;
+    private final String nodeString;
 
-    private final String versionConstraint;
-
-    private List<DependencyNode> children;
-
-    private Boolean optional;
-
-    private List<Exclusion> exclusions;
+    private List<DependencyNode> children = Collections.emptyList();
 
     /**
      * Constructs the DefaultDependencyNode.
      *
-     * @param parent            Parent node, may be {@code null}.
-     * @param artifact          Artifact associated with this dependency.
-     * @param premanagedVersion the premanaged version, may be {@code null}.
-     * @param premanagedScope   the premanaged scope, may be {@code null}.
-     * @param versionConstraint the version constraint, may be {@code null.}
+     * @param parent     Parent node, may be {@code null}.
+     * @param artifact   Artifact associated with this node.
+     * @param dependency Dependency that led to this node, {@code null} for the root.
+     * @param exclusions Exclusions of the dependency, may be {@code null}.
+     * @param nodeString The text returned by {@link #toNodeString()}, or {@code null} to derive it from the artifact,
+     *                   scope and optional flag.
      */
     public DefaultDependencyNode(
             DependencyNode parent,
             Artifact artifact,
-            String premanagedVersion,
-            String premanagedScope,
-            String versionConstraint) {
+            Dependency dependency,
+            List<Exclusion> exclusions,
+            String nodeString) {
         this.parent = parent;
         this.artifact = artifact;
-        this.premanagedVersion = premanagedVersion;
-        this.premanagedScope = premanagedScope;
-        this.versionConstraint = versionConstraint;
-    }
-
-    public DefaultDependencyNode(
-            DependencyNode parent,
-            Artifact artifact,
-            String premanagedVersion,
-            String premanagedScope,
-            String versionConstraint,
-            Boolean optional,
-            List<Exclusion> exclusions) {
-        this.parent = parent;
-        this.artifact = artifact;
-        this.premanagedVersion = premanagedVersion;
-        this.premanagedScope = premanagedScope;
-        this.versionConstraint = versionConstraint;
-        this.optional = optional;
+        this.dependency = dependency;
         this.exclusions = exclusions;
+        this.nodeString = nodeString;
     }
 
     // user to refer to winner
     public DefaultDependencyNode(Artifact artifact) {
-        this.artifact = artifact;
-        this.parent = null;
-        this.premanagedScope = null;
-        this.premanagedVersion = null;
-        this.versionConstraint = null;
+        this(null, artifact, null, null, null);
     }
 
     /**
@@ -121,6 +99,11 @@ public class DefaultDependencyNode implements DependencyNode {
         return artifact;
     }
 
+    @Override
+    public Dependency getDependency() {
+        return dependency;
+    }
+
     /**
      *
      * @param children  List of DependencyNode to set as child nodes.
@@ -146,23 +129,8 @@ public class DefaultDependencyNode implements DependencyNode {
     }
 
     @Override
-    public String getPremanagedVersion() {
-        return premanagedVersion;
-    }
-
-    @Override
-    public String getPremanagedScope() {
-        return premanagedScope;
-    }
-
-    @Override
-    public String getVersionConstraint() {
-        return versionConstraint;
-    }
-
-    @Override
     public Boolean getOptional() {
-        return optional;
+        return dependency != null ? dependency.isOptional() : null;
     }
 
     @Override
@@ -175,6 +143,25 @@ public class DefaultDependencyNode implements DependencyNode {
      */
     @Override
     public String toNodeString() {
-        return artifact + (Boolean.TRUE.equals(optional) ? " (optional)" : "");
+        if (nodeString != null) {
+            return nodeString;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(artifact.getGroupId())
+                .append(':')
+                .append(artifact.getArtifactId())
+                .append(':');
+        sb.append(dependency != null ? dependency.getType().id() : artifact.getExtension());
+        if (!artifact.getClassifier().isEmpty()) {
+            sb.append(':').append(artifact.getClassifier());
+        }
+        sb.append(':').append(artifact.getVersion());
+        if (dependency != null) {
+            sb.append(':').append(dependency.getScope().id());
+            if (dependency.isOptional()) {
+                sb.append(" (optional)");
+            }
+        }
+        return sb.toString();
     }
 }

@@ -18,12 +18,14 @@
  */
 package org.apache.maven.shared.dependency.graph.filter;
 
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
+import java.util.function.Predicate;
+
+import org.apache.maven.api.Dependency;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 
 /**
- * A dependency node filter that delegates to an artifact filter.
+ * A dependency node filter that delegates to a dependency predicate. The root node, which has no dependency, is
+ * always accepted.
  *
  * @author <a href="mailto:markhobson@gmail.com">Mark Hobson</a>
  * @version $Id$
@@ -33,18 +35,18 @@ public class ArtifactDependencyNodeFilter implements DependencyNodeFilter {
     // fields -----------------------------------------------------------------
 
     /**
-     * The artifact filter this dependency node filter delegates to.
+     * The predicate this dependency node filter delegates to.
      */
-    private final ArtifactFilter filter;
+    private final Predicate<Dependency> filter;
 
     // constructors -----------------------------------------------------------
 
     /**
-     * Creates a dependency node filter that delegates to the specified artifact filter.
+     * Creates a dependency node filter that delegates to the specified dependency predicate.
      *
-     * @param filter the artifact filter to delegate to
+     * @param filter the predicate to delegate to
      */
-    public ArtifactDependencyNodeFilter(ArtifactFilter filter) {
+    public ArtifactDependencyNodeFilter(Predicate<Dependency> filter) {
         this.filter = filter;
     }
 
@@ -55,19 +57,19 @@ public class ArtifactDependencyNodeFilter implements DependencyNodeFilter {
      */
     @Override
     public boolean accept(DependencyNode node) {
-        Artifact artifact = node.getArtifact();
+        Dependency dependency = node.getDependency();
 
-        return filter.include(artifact);
+        return dependency == null || filter.test(dependency);
     }
 
     // public methods ---------------------------------------------------------
 
     /**
-     * Gets the artifact filter this dependency node filter delegates to.
+     * Gets the predicate this dependency node filter delegates to.
      *
-     * @return the artifact filter this dependency node filter delegates to
+     * @return the predicate this dependency node filter delegates to
      */
-    public ArtifactFilter getArtifactFilter() {
+    public Predicate<Dependency> getArtifactFilter() {
         return filter;
     }
 }
