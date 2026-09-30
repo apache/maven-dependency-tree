@@ -17,6 +17,12 @@
 Contributing to [Apache Maven Dependency Tree](https://maven.apache.org/shared/maven-dependency-tree/)
 ======================
 
+> **Note: This library is planned for retirement.**
+>
+> - **New projects**: use [Maven Resolver](https://maven.apache.org/resolver/) directly instead.
+> - **Existing projects**: version 3.3.0 stays on Maven Central; plan the migration to Resolver.
+> - See [Issue #150](https://github.com/apache/maven-dependency-tree/issues/150) for the plan and migration pointers.
+
 [![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/apache/maven.svg?label=License)][license]
 [![Maven Central](https://img.shields.io/maven-central/v/org.apache.maven.shared/maven-dependency-tree.svg?label=Maven%20Central)](https://search.maven.org/artifact/org.apache.maven.shared/maven-dependency-tree)
 [![Reproducible Builds](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jvm-repo-rebuild/reproducible-central/master/content/org/apache/maven/shared/maven-dependency-tree/badge.json)](https://github.com/jvm-repo-rebuild/reproducible-central/blob/master/content/org/apache/maven/shared/maven-dependency-tree/README.md)

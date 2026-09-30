@@ -19,6 +19,12 @@ under the License.
 
 # Apache Maven Dependency Tree
 
+> **Note: This library is planned for retirement.**
+>
+> - **New projects**: use [Maven Resolver](https://maven.apache.org/resolver/) directly instead.
+> - **Existing projects**: version 3.3.0 stays on Maven Central; plan the migration to Resolver.
+> - See [Issue #150](https://github.com/apache/maven-dependency-tree/issues/150) for the plan and migration pointers.
+
 A tree-based API for resolution of Maven project dependencies.
 
 Component entry point is [`DependencyGraphBuilder`](./apidocs/org/apache/maven/shared/dependency/graph/DependencyGraphBuilder.html).
