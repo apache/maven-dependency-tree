@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class DefaultDependencyNodeTest {
 
@@ -41,5 +42,13 @@ class DefaultDependencyNodeTest {
         DefaultDependencyNode optionalNode =
                 new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList());
         assertEquals("group:artifact:jar:1.2:compile", optionalNode.toNodeString());
+    }
+
+    @Test
+    public void defaultDependencyNodeHasNullConflictData() {
+        DefaultDependencyNode node =
+                new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList());
+
+        assertNull(node.getConflictData());
     }
 }

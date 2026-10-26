@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Exclusion;
+import org.apache.maven.shared.dependency.graph.ConflictData;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 
@@ -176,5 +177,10 @@ public class DefaultDependencyNode implements DependencyNode {
     @Override
     public String toNodeString() {
         return artifact + (Boolean.TRUE.equals(optional) ? " (optional)" : "");
+    }
+
+    @Override
+    public ConflictData getConflictData() {
+        return null;
     }
 }

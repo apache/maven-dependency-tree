@@ -97,4 +97,11 @@ public interface DependencyNode {
      * @return the exclusions of the dependency
      */
     List<Exclusion> getExclusions();
+
+    /**
+     * If this is a verbose dependency node, this returns the conflict data. Otherwise, it returns null.
+     *
+     * @return the conflict data of verbose dependency node or null
+     */
+    ConflictData getConflictData();
 }
