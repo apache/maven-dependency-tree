@@ -50,8 +50,8 @@
     <url>https://github.com/apache/maven-dependency-tree/issues</url>
   </issueManagement>
   <ciManagement>
-    <system>Jenkins</system>
-    <url>https://ci-maven.apache.org/job/Maven/job/maven-box/job/maven-dependency-tree/</url>
+    <system>GitHub</system>
+    <url>https://github.com/apache/maven-dependency-tree/actions</url>
   </ciManagement>
   <distributionManagement>
     <site>
