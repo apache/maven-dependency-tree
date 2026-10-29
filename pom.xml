@@ -61,7 +61,6 @@
   </distributionManagement>
 
   <properties>
-    <javaVersion>8</javaVersion>
     <mavenVersion>3.6.3</mavenVersion>
     <resolverVersion>1.4.1</resolverVersion>
     <project.build.outputTimestamp>2024-05-26T18:03:01Z</project.build.outputTimestamp>
