@@ -20,6 +20,7 @@ package org.apache.maven.shared.dependency.graph.filter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 
@@ -74,6 +75,10 @@ public class AncestorOrSelfDependencyNodeFilter implements DependencyNodeFilter 
 
     /**
      * Gets whether the first dependency node is an ancestor-or-self of the second.
+     * <p>
+     * Nodes are compared by artifact rather than by {@link DependencyNode#equals(Object)}, since
+     * {@link DependencyNode} implementations are not required to implement value-based equality and a node may be
+     * tested against a tree that was rebuilt from, but no longer shares instances with, the tree it originated from.
      *
      * @param ancestorNode the ancestor-or-self dependency node
      * @param descendantNode the dependency node to test
@@ -83,7 +88,7 @@ public class AncestorOrSelfDependencyNodeFilter implements DependencyNodeFilter 
         boolean ancestor = false;
 
         while (!ancestor && descendantNode != null) {
-            ancestor = ancestorNode.equals(descendantNode);
+            ancestor = Objects.equals(ancestorNode.getArtifact(), descendantNode.getArtifact());
 
             descendantNode = descendantNode.getParent();
         }
