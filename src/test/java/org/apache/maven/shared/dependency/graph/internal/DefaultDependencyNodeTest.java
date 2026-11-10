@@ -18,12 +18,17 @@
  */
 package org.apache.maven.shared.dependency.graph.internal;
 
+import java.util.ArrayList;
+
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.DefaultArtifact;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DefaultDependencyNodeTest {
 
@@ -41,5 +46,40 @@ class DefaultDependencyNodeTest {
         DefaultDependencyNode optionalNode =
                 new DefaultDependencyNode(null, artifact, "1.0", "compile", "1.0", false, emptyList());
         assertEquals("group:artifact:jar:1.2:compile", optionalNode.toNodeString());
+    }
+
+    @Test
+    void nodesWithTheSameArtifactAreEqualEvenWhenNotTheSameInstance() {
+        DefaultDependencyNode node = new DefaultDependencyNode(null, artifact, null, null, null, false, emptyList());
+        DefaultDependencyNode sameCoordinates =
+                new DefaultDependencyNode(null, artifact, null, null, null, false, emptyList());
+
+        assertEquals(node, sameCoordinates);
+        assertEquals(node.hashCode(), sameCoordinates.hashCode());
+    }
+
+    @Test
+    void nodesWithDifferentArtifactsAreNotEqual() {
+        Artifact otherArtifact = new DefaultArtifact("group", "other", "1.2", "compile", "jar", "", null);
+        DefaultDependencyNode node = new DefaultDependencyNode(null, artifact, null, null, null, false, emptyList());
+        DefaultDependencyNode other =
+                new DefaultDependencyNode(null, otherArtifact, null, null, null, false, emptyList());
+
+        assertNotEquals(node, other);
+    }
+
+    @Test
+    void getChildrenReturnsAnUnmodifiableList() {
+        DefaultDependencyNode node = new DefaultDependencyNode(null, artifact, null, null, null, false, emptyList());
+        node.setChildren(new ArrayList<>());
+
+        assertThrows(
+                UnsupportedOperationException.class, () -> node.getChildren().add(new DefaultDependencyNode(artifact)));
+    }
+
+    @Test
+    void getChildrenStillReturnsNullWhenNeverSet() {
+        DefaultDependencyNode node = new DefaultDependencyNode(artifact);
+        assertNull(node.getChildren());
     }
 }

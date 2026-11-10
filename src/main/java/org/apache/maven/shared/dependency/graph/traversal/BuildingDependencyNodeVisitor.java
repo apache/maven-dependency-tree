@@ -19,6 +19,9 @@
 package org.apache.maven.shared.dependency.graph.traversal;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import org.apache.maven.shared.dependency.graph.DependencyNode;
@@ -41,7 +44,13 @@ public class BuildingDependencyNodeVisitor implements DependencyNodeVisitor {
     /**
      * The resultant tree parent nodes for the currently visited node.
      */
-    private final Stack<DependencyNode> parentNodes;
+    private final Stack<DefaultDependencyNode> parentNodes;
+
+    /**
+     * The children accumulated so far for each node of the resultant tree, keyed by node identity since the clones
+     * are not yet complete (and so not yet safe to use as value-based map keys) while a node is still being built.
+     */
+    private final Map<DefaultDependencyNode, List<DependencyNode>> childrenByNode;
 
     /**
      * The root node of the resultant tree.
@@ -68,6 +77,7 @@ public class BuildingDependencyNodeVisitor implements DependencyNodeVisitor {
         this.visitor = visitor;
 
         parentNodes = new Stack<>();
+        childrenByNode = new IdentityHashMap<>();
     }
 
     // DependencyNodeVisitor methods ------------------------------------------
@@ -86,13 +96,12 @@ public class BuildingDependencyNodeVisitor implements DependencyNodeVisitor {
                 node.getVersionConstraint(),
                 node.getOptional(),
                 node.getExclusions());
-        newNode.setChildren(new ArrayList<>());
 
         if (parentNodes.empty()) {
             rootNode = newNode;
         } else {
-            DependencyNode parentNode = parentNodes.peek();
-            parentNode.getChildren().add(newNode);
+            DefaultDependencyNode parentNode = parentNodes.peek();
+            childrenByNode.computeIfAbsent(parentNode, key -> new ArrayList<>()).add(newNode);
         }
 
         parentNodes.push(newNode);
@@ -105,7 +114,9 @@ public class BuildingDependencyNodeVisitor implements DependencyNodeVisitor {
      */
     @Override
     public boolean endVisit(DependencyNode node) {
-        parentNodes.pop();
+        DefaultDependencyNode newNode = parentNodes.pop();
+        newNode.setChildren(childrenByNode.getOrDefault(newNode, new ArrayList<>()));
+        childrenByNode.remove(newNode);
 
         // apply the visitor to the resultant tree on the last visit
         if (parentNodes.empty() && visitor != null) {
