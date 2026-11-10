@@ -18,7 +18,9 @@
  */
 package org.apache.maven.shared.dependency.graph.internal;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.model.Exclusion;
@@ -134,7 +136,7 @@ public class DefaultDependencyNode implements DependencyNode {
      */
     @Override
     public List<DependencyNode> getChildren() {
-        return children;
+        return children == null ? null : Collections.unmodifiableList(children);
     }
 
     /**
@@ -176,5 +178,26 @@ public class DefaultDependencyNode implements DependencyNode {
     @Override
     public String toNodeString() {
         return artifact + (Boolean.TRUE.equals(optional) ? " (optional)" : "");
+    }
+
+    /**
+     * Nodes are compared by artifact coordinates only, not by parent/children, so that two nodes describing the
+     * same dependency are considered equal even when they come from different builds of the same tree (e.g. a tree
+     * rebuilt by {@link org.apache.maven.shared.dependency.graph.traversal.BuildingDependencyNodeVisitor}).
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof DefaultDependencyNode)) {
+            return false;
+        }
+        return Objects.equals(artifact, ((DefaultDependencyNode) obj).artifact);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(artifact);
     }
 }
