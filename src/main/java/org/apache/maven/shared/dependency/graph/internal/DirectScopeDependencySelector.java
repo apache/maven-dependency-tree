@@ -81,8 +81,7 @@ public class DirectScopeDependencySelector implements DependencySelector {
         final int prime = 31;
         int result = 1;
         result = prime * result + depth;
-        result = prime * result + ((scope == null) ? 0 : scope.hashCode());
-        return result;
+        return prime * result + (scope == null ? 0 : scope.hashCode());
     }
 
     @Override

@@ -48,7 +48,7 @@ class VerboseDependencyNode extends DefaultDependencyNode {
     public String toNodeString() {
         StringBuilder buffer = new StringBuilder();
 
-        boolean included = (data.getWinnerVersion() == null);
+        boolean included = data.getWinnerVersion() == null;
 
         if (!included) {
             buffer.append('(');

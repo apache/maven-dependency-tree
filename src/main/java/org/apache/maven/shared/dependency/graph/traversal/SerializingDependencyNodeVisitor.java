@@ -186,7 +186,7 @@ public class SerializingDependencyNodeVisitor implements DependencyNodeVisitor {
         } else {
             List<DependencyNode> siblings = parent.getChildren();
 
-            last = (siblings.indexOf(node) == siblings.size() - 1);
+            last = siblings.indexOf(node) == siblings.size() - 1;
         }
 
         return last;
