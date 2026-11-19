@@ -18,6 +18,10 @@
  */
 package org.apache.maven.shared.dependency.graph.traversal;
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.filter.DependencyNodeFilter;
 
@@ -41,6 +45,8 @@ public class FilteringDependencyNodeVisitor implements DependencyNodeVisitor {
      */
     private final DependencyNodeFilter filter;
 
+    private final Map<DependencyNode, Boolean> acceptedNodes = Collections.synchronizedMap(new IdentityHashMap<>());
+
     // constructors -----------------------------------------------------------
 
     /**
@@ -62,15 +68,13 @@ public class FilteringDependencyNodeVisitor implements DependencyNodeVisitor {
      */
     @Override
     public boolean visit(DependencyNode node) {
-        boolean visit;
+        boolean accepted = filter.accept(node);
+        acceptedNodes.put(node, accepted);
 
-        if (filter.accept(node)) {
-            visit = visitor.visit(node);
-        } else {
-            visit = true;
+        if (accepted) {
+            return visitor.visit(node);
         }
-
-        return visit;
+        return true;
     }
 
     /**
@@ -78,15 +82,16 @@ public class FilteringDependencyNodeVisitor implements DependencyNodeVisitor {
      */
     @Override
     public boolean endVisit(DependencyNode node) {
-        boolean visit;
+        Boolean accepted = acceptedNodes.remove(node);
 
-        if (filter.accept(node)) {
-            visit = visitor.endVisit(node);
-        } else {
-            visit = true;
+        if (accepted == null) {
+            accepted = filter.accept(node);
         }
 
-        return visit;
+        if (accepted) {
+            return visitor.endVisit(node);
+        }
+        return true;
     }
 
     // public methods ---------------------------------------------------------
