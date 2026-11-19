@@ -20,6 +20,7 @@ package org.apache.maven.shared.dependency.graph.traversal;
 
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.maven.shared.dependency.graph.DependencyNode;
@@ -90,11 +91,6 @@ public class SerializingDependencyNodeVisitor implements DependencyNodeVisitor {
      */
     private final GraphTokens tokens;
 
-    /**
-     * The depth of the currently visited dependency node.
-     */
-    private int depth;
-
     // constructors -----------------------------------------------------------
 
     /**
@@ -121,8 +117,6 @@ public class SerializingDependencyNodeVisitor implements DependencyNodeVisitor {
         }
 
         this.tokens = tokens;
-
-        depth = 0;
     }
 
     // DependencyNodeVisitor methods ------------------------------------------
@@ -132,11 +126,11 @@ public class SerializingDependencyNodeVisitor implements DependencyNodeVisitor {
      */
     @Override
     public boolean visit(DependencyNode node) {
-        indent(node);
+        synchronized (writer) {
+            indent(node);
 
-        writer.println(node.toNodeString());
-
-        depth++;
+            writer.println(node.toNodeString());
+        }
 
         return true;
     }
@@ -146,8 +140,6 @@ public class SerializingDependencyNodeVisitor implements DependencyNodeVisitor {
      */
     @Override
     public boolean endVisit(DependencyNode node) {
-        depth--;
-
         return true;
     }
 
@@ -159,11 +151,17 @@ public class SerializingDependencyNodeVisitor implements DependencyNodeVisitor {
      * @param node the dependency node to indent
      */
     private void indent(DependencyNode node) {
-        for (int i = 1; i < depth; i++) {
-            writer.write(tokens.getFillIndent(isLast(node, i)));
+        List<DependencyNode> ancestors = new ArrayList<>();
+
+        for (DependencyNode parent = node.getParent(); parent != null; parent = parent.getParent()) {
+            ancestors.add(parent);
         }
 
-        if (depth > 0) {
+        for (int i = ancestors.size() - 2; i >= 0; i--) {
+            writer.write(tokens.getFillIndent(isLast(ancestors.get(i))));
+        }
+
+        if (!ancestors.isEmpty()) {
             writer.write(tokens.getNodeIndent(isLast(node)));
         }
     }
@@ -190,24 +188,5 @@ public class SerializingDependencyNodeVisitor implements DependencyNodeVisitor {
         }
 
         return last;
-    }
-
-    /**
-     * Gets whether the specified dependency node ancestor is the last of its siblings.
-     *
-     * @param node the dependency node whose ancestor to check
-     * @param ancestorDepth the depth of the ancestor of the specified dependency node to check
-     * @return <code>true</code> if the specified dependency node ancestor is the last of its siblings
-     */
-    private boolean isLast(DependencyNode node, int ancestorDepth) {
-        // TODO: remove node argument and calculate from visitor calls only
-
-        int distance = depth - ancestorDepth;
-
-        while (distance-- > 0) {
-            node = node.getParent();
-        }
-
-        return isLast(node);
     }
 }
