@@ -109,13 +109,16 @@ public class DefaultDependencyGraphBuilder implements DependencyGraphBuilder {
         }
     }
 
-    private Artifact getDependencyArtifact(Dependency dep) {
-        org.eclipse.aether.artifact.Artifact artifact = dep.getArtifact();
+    private Artifact getDependencyArtifact(org.eclipse.aether.graph.DependencyNode node) {
+        Dependency dep = node.getDependency();
+        org.eclipse.aether.artifact.Artifact artifact = (dep != null) ? dep.getArtifact() : node.getArtifact();
 
         Artifact mavenArtifact = RepositoryUtils.toArtifact(artifact);
 
-        mavenArtifact.setScope(dep.getScope());
-        mavenArtifact.setOptional(dep.isOptional());
+        if (dep != null) {
+            mavenArtifact.setScope(dep.getScope());
+            mavenArtifact.setOptional(dep.isOptional());
+        }
 
         return mavenArtifact;
     }
@@ -151,7 +154,7 @@ public class DefaultDependencyGraphBuilder implements DependencyGraphBuilder {
 
         List<DependencyNode> nodes = new ArrayList<>(node.getChildren().size());
         for (org.eclipse.aether.graph.DependencyNode child : node.getChildren()) {
-            Artifact childArtifact = getDependencyArtifact(child.getDependency());
+            Artifact childArtifact = getDependencyArtifact(child);
 
             if ((filter == null) || filter.include(childArtifact)) {
                 nodes.add(buildDependencyNode(current, child, childArtifact, filter));
