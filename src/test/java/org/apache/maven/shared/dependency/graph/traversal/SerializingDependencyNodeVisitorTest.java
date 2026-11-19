@@ -76,6 +76,6 @@ class SerializingDependencyNodeVisitorTest {
     }
 
     private static String lines(String... lines) {
-        return String.join(System.lineSeparator(), lines) + System.lineSeparator();
+        return String.join("\n", lines) + "\n";
     }
 }

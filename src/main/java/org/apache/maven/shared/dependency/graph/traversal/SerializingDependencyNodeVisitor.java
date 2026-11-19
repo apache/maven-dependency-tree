@@ -129,7 +129,8 @@ public class SerializingDependencyNodeVisitor implements DependencyNodeVisitor {
         synchronized (writer) {
             indent(node);
 
-            writer.println(node.toNodeString());
+            writer.print(node.toNodeString());
+            writer.write('\n');
         }
 
         return true;
