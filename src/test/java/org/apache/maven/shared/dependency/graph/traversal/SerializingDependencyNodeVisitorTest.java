@@ -27,7 +27,6 @@ import org.apache.maven.artifact.DefaultArtifact;
 import org.apache.maven.shared.dependency.graph.internal.DefaultDependencyNode;
 import org.junit.jupiter.api.Test;
 
-import static org.apache.maven.shared.dependency.graph.traversal.SerializingDependencyNodeVisitor.STANDARD_TOKENS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SerializingDependencyNodeVisitorTest {
@@ -44,7 +43,7 @@ class SerializingDependencyNodeVisitorTest {
         secondChild.setChildren(Collections.emptyList());
 
         StringWriter output = new StringWriter();
-        root.accept(new SerializingDependencyNodeVisitor(output, STANDARD_TOKENS));
+        root.accept(new SerializingDependencyNodeVisitor(output, SerializingDependencyNodeVisitor.STANDARD_TOKENS));
 
         assertEquals(
                 lines(
@@ -60,7 +59,8 @@ class SerializingDependencyNodeVisitorTest {
         DefaultDependencyNode firstRoot = node("first", null);
         DefaultDependencyNode secondRoot = node("second", null);
         StringWriter output = new StringWriter();
-        SerializingDependencyNodeVisitor visitor = new SerializingDependencyNodeVisitor(output, STANDARD_TOKENS);
+        SerializingDependencyNodeVisitor visitor =
+                new SerializingDependencyNodeVisitor(output, SerializingDependencyNodeVisitor.STANDARD_TOKENS);
 
         visitor.visit(firstRoot);
         visitor.visit(secondRoot);
