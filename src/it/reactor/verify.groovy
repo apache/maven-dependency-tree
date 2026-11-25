@@ -17,16 +17,16 @@
  * under the License.
  */
 
-String actual = new File( basedir, "module-z-deps-y/target/tree.txt" ).getText( 'UTF-8' );
-String expected = new File( basedir, "expected-tree.txt" ).getText( 'UTF-8' );
+String actual = new File(basedir, "module-z-deps-y/target/tree.txt").getText('UTF-8')
+String expected = new File(basedir, "expected-tree.txt").getText('UTF-8')
 
-actual = actual.replaceAll( "[\n\r]+", "\n" );
-expected = expected.replaceAll( "[\n\r]+", "\n" );
+actual = actual.replaceAll("[\n\r]+", "\n")
+expected = expected.replaceAll("[\n\r]+", "\n")
 
-System.out.println( "Checking module-z-deps-y dependency tree..." );
+System.out.println("Checking module-z-deps-y dependency tree...")
 
-assert actual.equals( expected ) : "Unexpected dependency tree"
+assert actual.equals(expected) : "Unexpected dependency tree"
 
-File resolved = new File( basedir, "resolved-module-z-deps-y.txt" );
+File resolved = new File( basedir, "resolved-module-z-deps-y.txt" )
 
 assert !resolved.exists()

@@ -17,15 +17,15 @@
  * under the License.
  */
 
-File outputFile = new File( basedir, "target/tree.txt" );
-File expectedFile = new File( basedir, "expected.txt" );
+File outputFile = new File(basedir, "target/tree.txt")
+File expectedFile = new File(basedir, "expected.txt")
 
-String actual = outputFile.getText( 'UTF-8' );
-String expected = expectedFile.getText( 'UTF-8' );
+String actual = outputFile.getText('UTF-8')
+String expected = expectedFile.getText('UTF-8')
 
-actual = actual.replaceAll( "[\n\r]+", "\n" );
-expected = expected.replaceAll( "[\n\r]+", "\n" );
+actual = actual.replaceAll("[\n\r]+", "\n")
+expected = expected.replaceAll("[\n\r]+", "\n")
 
-System.out.println( "Checking dependency tree..." );
+System.out.println("Checking dependency tree...")
 
-assert actual.equals( expected ) : "Unexpected dependency tree"
+assert actual.equals(expected) : "Unexpected dependency tree"
