@@ -17,10 +17,10 @@
  * under the License.
  */
 
-def actual = new File( basedir, "target/tree-verbose.txt" ).readLines()
-def expected = new File( basedir, "expected-verbose.txt" ).readLines()
-assert actual.equals( expected )
+def actual = new File(basedir, "target/tree-verbose.txt").readLines()
+def expected = new File(basedir, "expected-verbose.txt").readLines()
+assert actual.equals(expected)
 
-actual = new File( basedir, "target/tree-default.txt" ).readLines()
-expected = new File( basedir, "expected-default.txt" ).readLines()
-assert actual.equals( expected )
+actual = new File(basedir, "target/tree-default.txt").readLines()
+expected = new File(basedir, "expected-default.txt").readLines()
+assert actual.equals(expected)
