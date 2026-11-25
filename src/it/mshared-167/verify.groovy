@@ -17,24 +17,15 @@
  * under the License.
  */
 
-import java.io.*;
-
-import org.codehaus.plexus.util.*;
-
 File outputFile = new File( basedir, "target/tree.txt" );
 File expectedFile = new File( basedir, "expected.txt" );
 
-String actual = FileUtils.fileRead( outputFile );
-String expected = FileUtils.fileRead( expectedFile );
+String actual = outputFile.getText( 'UTF-8' );
+String expected = expectedFile.getText( 'UTF-8' );
 
 actual = actual.replaceAll( "[\n\r]+", "\n" );
 expected = expected.replaceAll( "[\n\r]+", "\n" );
 
 System.out.println( "Checking dependency tree..." );
 
-if ( !actual.equals( expected ) )
-{
-    throw new Exception( "Unexpected dependency tree" );
-}
-
-return true;
+assert actual.equals( expected ) : "Unexpected dependency tree"

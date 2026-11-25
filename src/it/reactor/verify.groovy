@@ -17,23 +17,16 @@
  * under the License.
  */
 
-import java.io.*;
-
-import org.codehaus.plexus.util.*;
-
-String actual = FileUtils.fileRead( new File( basedir, "module-z-deps-y/target/tree.txt" ) );
-String expected = FileUtils.fileRead( new File( basedir, "expected-tree.txt" ) );
+String actual = new File( basedir, "module-z-deps-y/target/tree.txt" ).getText( 'UTF-8' );
+String expected = new File( basedir, "expected-tree.txt" ).getText( 'UTF-8' );
 
 actual = actual.replaceAll( "[\n\r]+", "\n" );
 expected = expected.replaceAll( "[\n\r]+", "\n" );
 
 System.out.println( "Checking module-z-deps-y dependency tree..." );
 
-if ( !actual.equals( expected ) )
-{
-    throw new Exception( "Unexpected dependency tree" );
-}
+assert actual.equals( expected ) : "Unexpected dependency tree"
 
 File resolved = new File( basedir, "resolved-module-z-deps-y.txt" );
 
-return !resolved.exists();
+assert !resolved.exists()
