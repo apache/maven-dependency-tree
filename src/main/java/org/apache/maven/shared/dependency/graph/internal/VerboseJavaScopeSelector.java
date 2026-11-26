@@ -48,11 +48,17 @@ public class VerboseJavaScopeSelector extends ScopeSelector {
     }
 
     static class ScopeComparator implements Comparator<String> {
-        List<String> orderedScopes = Arrays.asList("compile", "runtime", "provided", "test");
+        private static final List<String> ORDERED_SCOPES = Arrays.asList("compile", "runtime", "provided", "test");
 
         @Override
         public int compare(String lhs, String rhs) {
-            return orderedScopes.indexOf(rhs) - orderedScopes.indexOf(lhs);
+            int byPriority = Integer.compare(priority(lhs), priority(rhs));
+            return byPriority == 0 ? lhs.compareTo(rhs) : byPriority;
+        }
+
+        private static int priority(String scope) {
+            int index = ORDERED_SCOPES.indexOf(scope);
+            return index < 0 ? 0 : ORDERED_SCOPES.size() - index;
         }
     }
 }
