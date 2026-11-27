@@ -18,6 +18,7 @@
  */
 package org.apache.maven.shared.dependency.graph;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -136,7 +137,7 @@ public class DependencyCollectorRequest {
     }
 
     public Map<String, Object> getConfigProperties() {
-        return this.configProperties;
+        return Collections.unmodifiableMap(new HashMap<>(this.configProperties));
     }
 
     public void addConfigProperty(String key, Object value) {
